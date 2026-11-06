@@ -1,3 +1,5 @@
-node_modules
+tools/*.onnx
 out
+node_modules
 *.mp4
+public/audio/shots/*_raw.wav

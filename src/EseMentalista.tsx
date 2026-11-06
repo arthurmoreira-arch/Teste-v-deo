@@ -4,7 +4,7 @@ import {Overlay} from './Overlay';
 import {shotFrames, shots, starts} from './script';
 
 // Ligue estas flags quando adicionar os arquivos em /public
-const HAS_NARRATION = false; // public/audio/narracao.mp3
+const HAS_NARRATION = true; // public/audio/shots/NN.mp3 (gerado por tools/gerar-voz.py)
 const HAS_MUSIC = false; // public/audio/trilha.mp3
 
 export const EseMentalista = () => (
@@ -13,10 +13,10 @@ export const EseMentalista = () => (
     {shots.map((s, i) => (
       <Sequence key={s.id} from={starts[i]} durationInFrames={shotFrames(s)}>
         <Overlay shot={s} />
+        {HAS_NARRATION && <Audio src={staticFile(`audio/shots/${String(i).padStart(2, '0')}.mp3`)} volume={1} />}
       </Sequence>
     ))}
     <AbsoluteFill style={{background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.5) 100%)', pointerEvents: 'none'}} />
-    {HAS_NARRATION && <Audio src={staticFile('audio/narracao.mp3')} />}
     {HAS_MUSIC && <Audio src={staticFile('audio/trilha.mp3')} volume={0.18} />}
   </AbsoluteFill>
 );

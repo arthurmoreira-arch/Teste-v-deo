@@ -1,6 +1,8 @@
 // Roteiro em SHOTS (planos) — cada shot tem narração, ambiente 3D, elenco e câmera.
 // Marcação de legenda: *amarelo*  e  !vermelho!   (como no vídeo de referência)
 
+import durations from '../public/audio/durations.json';
+
 export const FPS = 30;
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
@@ -212,8 +214,13 @@ export const shots: Shot[] = [
 export const wordsOf = (text: string) => text.split(/\s+/).filter(Boolean);
 export const plain = (w: string) => w.replace(/[*!]/g, '');
 
-export const shotFrames = (s: Shot) =>
-  Math.max(45, Math.round((wordsOf(s.text).length / WORDS_PER_SECOND + 0.5) * FPS));
+const audioSeconds = (id: string): number | undefined => (durations as Record<string, number>)[id];
+
+/** Duração do plano: segue a voz (quando existe) + respiro de 0,4s; senão estima pelo nº de palavras. */
+export const shotFrames = (s: Shot) => {
+  const d = audioSeconds(s.id);
+  return d ? Math.round((d + 0.4) * FPS) : Math.max(45, Math.round((wordsOf(s.text).length / WORDS_PER_SECOND + 0.5) * FPS));
+};
 
 export const starts = shots.reduce<number[]>((acc, s, i) => {
   acc.push(i === 0 ? 0 : acc[i - 1] + shotFrames(shots[i - 1]));

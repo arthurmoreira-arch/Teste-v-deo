@@ -73,15 +73,36 @@ const Eye = ({x, look, face}: {x: number; look: number; face: Face}) => (
 
 const Face_ = ({face, redjohn, t}: {face: Face; redjohn?: boolean; t: number}) => {
   if (redjohn) {
-    // máscara pálida com o smiley vermelho (assinatura do Red John)
+    // Smiley pintado com sangue (assinatura do Red John): anel, dois olhos, sorriso largo e pingos
+    const blood = <meshStandardMaterial color="#8f0a0e" roughness={0.35} emissive="#5a0000" emissiveIntensity={0.5} />;
+    const drip = (x: number, y: number, len: number) => (
+      <mesh key={`${x}${y}`} position={[x, y - len / 2, 0.275]}>
+        <capsuleGeometry args={[0.012, len, 4, 8]} />
+        {blood}
+      </mesh>
+    );
     return (
-      <group>
-        <Part kind="sphere" args={[0.05]} color="#d10f1a" pos={[-0.12, 0.08, 0.31]} scale={[1, 1, 0.4]} outline={1} emissive="#ff0000" emissiveIntensity={0.7} />
-        <Part kind="sphere" args={[0.05]} color="#d10f1a" pos={[0.12, 0.08, 0.31]} scale={[1, 1, 0.4]} outline={1} emissive="#ff0000" emissiveIntensity={0.7} />
-        <mesh position={[0, -0.04, 0.31]} rotation={[0, 0, Math.PI]}>
-          <torusGeometry args={[0.13, 0.022, 8, 20, Math.PI]} />
-          <meshStandardMaterial color="#d10f1a" emissive="#ff0000" emissiveIntensity={0.7} />
+      <group position={[0, 0, 0.03]}>
+        <mesh position={[0, 0, 0.26]}>
+          <torusGeometry args={[0.235, 0.026, 10, 40]} />
+          {blood}
         </mesh>
+        <mesh position={[-0.085, 0.07, 0.31]} scale={[0.8, 1.35, 0.5]}>
+          <sphereGeometry args={[0.04, 14, 12]} />
+          {blood}
+        </mesh>
+        <mesh position={[0.085, 0.07, 0.31]} scale={[0.8, 1.35, 0.5]}>
+          <sphereGeometry args={[0.04, 14, 12]} />
+          {blood}
+        </mesh>
+        <mesh position={[0, -0.02, 0.29]} rotation={[0, 0, Math.PI * 1.5 - Math.PI * 0.425]}>
+          <torusGeometry args={[0.135, 0.022, 10, 28, Math.PI * 0.85]} />
+          {blood}
+        </mesh>
+        {drip(-0.085, 0.03, 0.09)}
+        {drip(-0.17, -0.1, 0.12)}
+        {drip(0.19, -0.1, 0.07)}
+        {drip(0.02, -0.2, 0.1)}
       </group>
     );
   }

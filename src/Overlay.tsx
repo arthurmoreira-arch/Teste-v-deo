@@ -61,7 +61,7 @@ const Caption = ({shot}: {shot: Shot}) => {
   const {fps} = useVideoConfig();
   const s = spring({frame: frame - 4 - pageStart, fps, config: {damping: 14, stiffness: 220}, durationInFrames: 10});
   return (
-    <div style={{position: 'absolute', left: 40, right: 40, top: 1230, textAlign: 'center', fontFamily: 'OswaldX', fontWeight: 700, fontSize: 104, lineHeight: 1.05, textTransform: 'uppercase', transform: `scale(${0.82 + 0.18 * s})`, opacity: Math.min(1, s * 1.6)}}>
+    <div style={{position: 'absolute', left: 40, right: 40, top: 1180, textAlign: 'center', fontFamily: 'OswaldX', fontWeight: 700, fontSize: 104, lineHeight: 1.05, textTransform: 'uppercase', transform: `scale(${0.82 + 0.18 * s})`, opacity: Math.min(1, s * 1.6)}}>
       {pages[page].map((t, i) => (
         <span key={i} style={{color: COLORS[t.c], marginRight: 22, WebkitTextStroke: '10px #000', paintOrder: 'stroke fill', textShadow: '0 5px 0 #000'}}>
           {t.w}
@@ -87,8 +87,8 @@ const Hud = ({shot}: {shot: Shot}) => {
   );
 };
 
-const Poll = () => {
-  const frame = useCurrentFrame();
+const Poll = ({instant}: {instant?: boolean}) => {
+  const frame = useCurrentFrame() + (instant ? 80 : 0);
   const a = interpolate(frame, [20, 34], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   const btn = (bg: string, fg: string, txt: string, d: number) => {
     const k = interpolate(frame, [d, d + 10], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
@@ -110,10 +110,40 @@ const Poll = () => {
   );
 };
 
+const CtaButtons = () => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const items = [
+    {icon: '👍', label: 'CURTE', bg: '#ff3b5c', at: 14},
+    {icon: '➕', label: 'SEGUE', bg: '#f7c61a', at: 40, fg: '#1a1200'},
+    {icon: '🗳️', label: 'VOTA', bg: '#35c46a', at: 66},
+  ];
+  return (
+    <div style={{position: 'absolute', left: 0, right: 0, top: 1500, display: 'flex', justifyContent: 'center', gap: 26}}>
+      {items.map((it) => {
+        const k = spring({frame: frame - it.at, fps, config: {damping: 10, stiffness: 180}});
+        const wob = 1 + Math.sin(frame / 5 + it.at) * 0.025 * Math.min(1, k);
+        return (
+          <div key={it.label} style={{background: it.bg, color: it.fg ?? '#fff', borderRadius: 26, padding: '18px 26px', textAlign: 'center', fontFamily: 'OswaldX', fontWeight: 700, transform: `scale(${Math.max(0, k) * wob})`, boxShadow: '0 8px 0 rgba(0,0,0,.5)', width: 270}}>
+            <div style={{fontSize: 74, lineHeight: 1}}>{it.icon}</div>
+            <div style={{fontSize: 52}}>{it.label}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 export const Overlay = ({shot}: {shot: Shot}) => (
   <>
     <Tag />
     <Hud shot={shot} />
-    {shot.poll ? <Poll /> : <Caption shot={shot} />}
+    {shot.poll ? <Poll instant={shot.cta} /> : <Caption shot={shot} />}
+    {shot.cta && (
+      <>
+        <Caption shot={shot} />
+        <CtaButtons />
+      </>
+    )}
   </>
 );

@@ -38,6 +38,7 @@ export type Shot = {
   fov?: number;
   hud?: Hud;
   poll?: boolean;
+  cta?: boolean; // chamada final: curtir, seguir, votar
   envProps?: {cry?: boolean; crowd?: number};
 };
 
@@ -208,6 +209,23 @@ export const shots: Shot[] = [
     ],
     envProps: {crowd: 1},
     poll: true,
+  },
+  {
+    id: 'cta',
+    text: '*Vote* A ou B nos comentários, *segue o canal* e deixa o *like* pra ver mais E se!',
+    env: 'street',
+    mood: 'day',
+    cast: [
+      J({pos: [0, 0, 0], face: 'smirk', pose: 'stand'}),
+      {who: 'lisbon', pos: [-1.6, 0, -3], face: 'neutral', pose: 'stand'},
+    ],
+    cam: [
+      {p: [0, 6, 6], l: [0, 1.2, -3]},
+      {p: [0, 5.4, 5.2], l: [0, 1.3, -3]},
+    ],
+    envProps: {crowd: 1},
+    poll: true,
+    cta: true,
   },
 ];
 

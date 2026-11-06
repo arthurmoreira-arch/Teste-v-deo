@@ -15,5 +15,8 @@ npm run render   # gera out/e-se-mentalista.mp4 (~55s)
 - Voz: `docs/03-producao.md` → salve em `public/audio/narracao.mp3` e ligue `HAS_NARRATION`
 - Título, thumbnail, hashtags e trilha: `docs/03-producao.md`
 
-> Nota: o estilo visual atual é uma base noir (smiley vermelho em 3D, poeira, legenda palavra a palavra).
-> Ele deve ser ajustado ao vídeo de referência assim que eu puder ver o arquivo.
+## Estilo (baseado no vídeo de referência)
+3D low-poly cartoon com contorno preto grosso, multidão de bonecos brancos, câmera alternando drone/close-up a cada ~2s, legenda central em Oswald (2-3 palavras, destaque *amarelo*/!vermelho!), tag "E SE #1", contador dourado e card final A/B.
+Tudo em `src/`: `script.ts` (planos), `characters.tsx`, `envs.tsx`, `World3D.tsx` (Three.js), `Overlay.tsx` (legenda/HUD/poll).
+
+Renderização em CPU é lenta (~10 min em 0.4x); use `npx remotion render ... --scale=0.5` para revisar e GPU local para o final.

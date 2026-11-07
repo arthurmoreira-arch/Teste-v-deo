@@ -5,7 +5,7 @@ Uso: python3 tools/gerar-voz.py   (precisa: pip install piper-tts, ffmpeg)
 import json, re, subprocess, sys, pathlib
 
 root = pathlib.Path(__file__).resolve().parent.parent
-model = root / "tools" / "pt-br-edresson-low.onnx"
+model = root / "tools" / "pt_BR-faber-medium.onnx"
 out = root / "public" / "audio" / "shots"
 out.mkdir(parents=True, exist_ok=True)
 
@@ -15,10 +15,10 @@ if not shots:
     sys.exit("não achei os shots em src/script.ts")
 
 # pronúncia: ajuda o TTS com nomes em inglês
-FIX = {"Red John": "Réd Djón", "Patrick Jane": "Pátrick Djêin", "Jane": "Djêin", "CBI": "Cê Bê Í", "Charlotte": "Charlót", "Lisbon": "Lísbon"}
+FIX = {"Red John": "Réd Djón", "Patrick Jane": "Pátrick Djêin", "Jane": "Djêin", "CBI": "Cê Bê Í", "Charlotte": "Charlót", "Lisbon": "Lísbon", "parte dois": "parte dois"}
 
 # cadeia de áudio: limpa graves, realça presença, comprime e sobe para 44,1 kHz (som de "locutor")
-AF = "highpass=f=90,equalizer=f=180:t=q:w=1:g=3,equalizer=f=3200:t=q:w=1.2:g=3,acompressor=threshold=-20dB:ratio=3:attack=5:release=80,loudnorm=I=-16:TP=-1.5,aresample=44100"
+AF = "highpass=f=70,equalizer=f=150:t=q:w=1:g=2,equalizer=f=3500:t=q:w=1.2:g=2.5,acompressor=threshold=-21dB:ratio=3:attack=4:release=90,loudnorm=I=-15:TP=-1.5,aresample=44100"
 
 durations = {}
 for i, (sid, text) in enumerate(shots):
@@ -28,7 +28,7 @@ for i, (sid, text) in enumerate(shots):
     raw = out / f"{i:02d}_raw.wav"
     fin = out / f"{i:02d}.mp3"
     subprocess.run(
-        [sys.executable, "-m", "piper", "-m", str(model), "-f", str(raw), "--length-scale", "0.93", "--sentence-silence", "0.25"],
+        [sys.executable, "-m", "piper", "-m", str(model), "-f", str(raw), "--length-scale", "0.95", "--noise-scale", "0.75", "--noise-w", "0.9", "--sentence-silence", "0.3"],
         input=t.encode("utf-8"), check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(raw), "-af", AF, "-b:a", "160k", str(fin)], check=True)

@@ -38,6 +38,8 @@ export type Shot = {
   fov?: number;
   hud?: Hud;
   poll?: boolean;
+  banner?: string; // título de gancho no topo (primeiros 2s)
+  sfx?: 'hit' | 'whoosh'; // efeito sonoro no início do plano
   cta?: boolean; // chamada final: curtir, seguir, votar
   envProps?: {cry?: boolean; crowd?: number};
 };
@@ -46,39 +48,31 @@ const J = (o: Partial<Actor> = {}): Actor => ({who: 'jane', pos: [0, 0, 0], ...o
 
 export const shots: Shot[] = [
   {
-    id: 'gancho-1',
-    text: 'Patrick Jane é o *maior mentalista* da TV.',
-    env: 'studio',
-    mood: 'warm',
-    cast: [J({face: 'smirk'})],
+    id: 'gancho',
+    text: 'Se o Patrick Jane tivesse ficado *calado,* o !Red John! ainda estaria matando.',
+    env: 'street',
+    mood: 'cold',
+    night: 0.4,
+    cast: [{who: 'redjohn', pos: [0, 0, -2.2], rotY: 0, pose: 'stand', face: 'neutral'}],
     cam: [
-      {p: [0, 2.1, 5.4], l: [0, 1.3, 0]},
-      {p: [0, 1.8, 3.4], l: [0, 1.45, 0]},
+      {p: [0, 1.85, 1.2], l: [0, 1.82, -2.2]},
+      {p: [0, 1.82, -0.1], l: [0, 1.8, -2.2]},
     ],
-    envProps: {crowd: 0},
-  },
-  {
-    id: 'gancho-2',
-    text: 'Mas tudo começou com *uma única frase.*',
-    env: 'studio',
-    mood: 'warm',
-    cast: [J({face: 'talk'})],
-    cam: [
-      {p: [0.5, 1.75, 3.2], l: [0, 1.65, 0]},
-      {p: [0.1, 1.7, 1.9], l: [0, 1.65, 0]},
-    ],
-    hud: {label: 'AUDIÊNCIA AO VIVO', from: 0, to: 8200000},
+    envProps: {crowd: 1},
+    banner: 'E SE O JANE FICASSE CALADO?',
+    sfx: 'hit',
   },
   {
     id: 'erro-1',
-    text: 'Ele chamou o Red John de *homem solitário e repulsivo,* em rede nacional.',
+    text: 'Em rede nacional, ele chamou o assassino de *solitário e repulsivo.*',
     env: 'studio',
     mood: 'warm',
-    cast: [J({face: 'smirk', rotY: -0.25})],
+    cast: [J({face: 'talk', rotY: -0.25})],
     cam: [
       {p: [-1.8, 1.4, 2.8], l: [0, 1.6, 0]},
       {p: [-0.6, 1.7, 1.8], l: [0, 1.65, 0]},
     ],
+    hud: {label: 'AUDIÊNCIA AO VIVO', from: 0, to: 8200000},
   },
   {
     id: 'erro-2',
@@ -91,10 +85,11 @@ export const shots: Shot[] = [
       {p: [8, 4, 19], l: [0, 2.4, 0]},
       {p: [2.5, 2.8, 10], l: [-0.5, 2.4, 0]},
     ],
+    sfx: 'hit',
   },
   {
     id: 'virada',
-    text: 'Agora imagine que ele *nunca* tivesse aberto a boca.',
+    text: 'Mas e se ele *nunca* tivesse dito nada?',
     env: 'studio',
     mood: 'cold',
     cast: [J({face: 'shock'})],
@@ -120,7 +115,7 @@ export const shots: Shot[] = [
   },
   {
     id: 'familia-2',
-    text: 'Mas Jane seguiria como um *charlatão famoso,* lucrando com a !dor! de quem perdeu alguém.',
+    text: 'Só que o Jane seria um *charlatão famoso,* lucrando com a !dor! dos outros.',
     env: 'studio',
     mood: 'warm',
     cast: [J({face: 'smirk', pose: 'stand'})],
@@ -133,7 +128,7 @@ export const shots: Shot[] = [
   },
   {
     id: 'cbi-1',
-    text: 'Sem a tragédia, não existiria o *CBI de Jane.*',
+    text: 'Sem a tragédia, não existiria o *CBI.*',
     env: 'office',
     mood: 'cold',
     cast: [{who: 'lisbon', pos: [0, 0, -2.2], face: 'sad', pose: 'stand'}],
@@ -145,7 +140,7 @@ export const shots: Shot[] = [
   },
   {
     id: 'cbi-2',
-    text: 'Nem a *Lisbon* ao lado dele. Nem um único caso !resolvido.!',
+    text: 'Nem a *Lisbon.* Nem um único caso !resolvido.!',
     env: 'office',
     mood: 'cold',
     cast: [{who: 'lisbon', pos: [0, 0, -2.2], face: 'sad', pose: 'stand'}],
@@ -168,10 +163,11 @@ export const shots: Shot[] = [
       {p: [0, 14, 26], l: [0, 10, -14]},
     ],
     hud: {label: 'ASSASSINO SOLTO', from: 1, to: 1},
+    sfx: 'hit',
   },
   {
     id: 'rj-2',
-    text: 'Sem ninguém no encalço dele. Sem ninguém capaz de *ler os seus passos.*',
+    text: 'Ninguém capaz de *ler os passos dele.*',
     env: 'street',
     mood: 'cold',
     night: 0.4,
@@ -209,10 +205,11 @@ export const shots: Shot[] = [
     ],
     envProps: {crowd: 1},
     poll: true,
+    sfx: 'hit',
   },
   {
     id: 'cta',
-    text: '*Vote* A ou B nos comentários, *segue o canal* e deixa o *like* pra ver mais E se!',
+    text: '*Vota* A ou B nos comentários, *curte* e *segue* pra parte dois: e se a Lisbon tivesse matado o Red John?',
     env: 'street',
     mood: 'day',
     cast: [

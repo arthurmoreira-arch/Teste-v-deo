@@ -134,9 +134,23 @@ const CtaButtons = () => {
   );
 };
 
+const Banner = ({text}: {text: string}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const k = spring({frame, fps, config: {damping: 9, stiffness: 200}});
+  const out = interpolate(frame, [70, 82], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const shake = frame < 14 ? Math.sin(frame * 3) * 6 : 0;
+  return (
+    <div style={{position: 'absolute', left: 40, right: 40, top: 260, textAlign: 'center', opacity: out, transform: `scale(${k}) translateX(${shake}px)`, fontFamily: 'OswaldX', fontWeight: 700, fontSize: 124, lineHeight: 1.0, color: YELLOW, textTransform: 'uppercase', WebkitTextStroke: '12px #000', paintOrder: 'stroke fill', textShadow: '0 8px 0 #000'}}>
+      {text}
+    </div>
+  );
+};
+
 export const Overlay = ({shot}: {shot: Shot}) => (
   <>
     <Tag />
+    {shot.banner && <Banner text={shot.banner} />}
     <Hud shot={shot} />
     {shot.poll ? <Poll instant={shot.cta} /> : <Caption shot={shot} />}
     {shot.cta && (

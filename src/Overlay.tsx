@@ -130,7 +130,7 @@ const CommentCard = ({c, instant}: {c: Comment; instant?: boolean}) => {
   const k = spring({frame: frame - 3, fps, config: {damping: 12, stiffness: 160}});
   const initial = c.user.replace('@', '').charAt(0).toUpperCase();
   return (
-    <div style={{position: 'absolute', left: 60, right: 60, top: 560, transform: `scale(${0.7 + 0.3 * k}) rotate(${(1 - k) * -4}deg)`, opacity: Math.min(1, k * 1.4)}}>
+    <div style={{position: 'absolute', left: 60, right: 60, top: 1340, transform: `scale(${0.7 + 0.3 * k}) rotate(${(1 - k) * -4}deg)`, opacity: Math.min(1, k * 1.4)}}>
       <div style={{background: 'rgba(24,25,28,0.96)', borderRadius: 34, padding: '30px 34px', display: 'flex', gap: 26, boxShadow: '0 18px 40px rgba(0,0,0,.6)', border: '3px solid rgba(255,255,255,.08)'}}>
         <div style={{flex: '0 0 auto', width: 104, height: 104, borderRadius: 52, padding: 5, background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf)'}}>
           <div style={{width: '100%', height: '100%', borderRadius: 50, background: '#2b2d33', border: '4px solid #18191c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'OswaldX', fontWeight: 700, fontSize: 52, color: '#fff'}}>{initial}</div>

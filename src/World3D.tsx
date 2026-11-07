@@ -16,14 +16,18 @@ const MOODS = {
 
 const lerp3 = (a: V3, b: V3, k: number): V3 => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
 
-const Rig = ({shot, k}: {shot: Shot; k: number}) => {
+const Rig = ({shot, k, local}: {shot: Shot; k: number; local: number}) => {
   const {camera} = useThree();
   useLayoutEffect(() => {
     const p = lerp3(shot.cam[0].p, shot.cam[1].p, k);
     const l = lerp3(shot.cam[0].l, shot.cam[1].l, k);
-    camera.position.set(...p);
+    // tremida nos planos de impacto + "zoom punch" no início de todo corte
+    const hit = shot.sfx === 'hit' && local < 14 ? Math.exp(-local / 4) : 0;
+    const sh = hit * 0.09;
+    camera.position.set(p[0] + Math.sin(local * 5.1) * sh, p[1] + Math.cos(local * 6.3) * sh, p[2]);
     camera.lookAt(...l);
-    (camera as THREE.PerspectiveCamera).fov = shot.fov ?? 55;
+    const punch = local < 9 ? (1 - local / 9) * 7 : 0;
+    (camera as THREE.PerspectiveCamera).fov = (shot.fov ?? 55) - punch;
     camera.updateProjectionMatrix();
   });
   return null;
@@ -49,7 +53,7 @@ export const World3D = () => {
     <ThreeCanvas width={width} height={height} shadows camera={{position: [0, 2, 6], fov: 55, near: 0.1, far: 220}} gl={{antialias: true}}>
       <color attach="background" args={[sky]} />
       <fog attach="fog" args={[sky, shot.env === 'city' ? 70 : 30, shot.env === 'city' ? 140 : 80]} />
-      <Rig shot={shot} k={k} />
+      <Rig shot={shot} k={k} local={local} />
       <ambientLight color={night > 0.5 ? '#3a4a8a' : m.amb} intensity={ambI} />
       <directionalLight
         color={night > 0.5 ? '#6f86d8' : m.dir}

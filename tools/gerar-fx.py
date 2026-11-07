@@ -26,25 +26,68 @@ def lowpass(x, a):
         acc += a * (v - acc); y[i] = acc
     return y
 
-# ---- trilha: Lá menor sombrio, 80s
-D = 80; t = np.arange(D * SR) / SR
-pad = np.zeros_like(t)
-for f, g in [(55, .5), (82.41, .3), (110, .22), (130.81, .14), (164.81, .08)]:
-    vib = 1 + 0.003 * np.sin(2 * np.pi * 0.2 * t + f)
-    pad += g * np.sin(2 * np.pi * f * vib * t)
-pad *= 0.6 + 0.4 * np.sin(2 * np.pi * t / 9.0 - 1)
-noise = lowpass(rng.standard_normal(D * SR), 0.02) * 0.9
-beat = np.zeros_like(t)
-bpm_period = 1.05
-for k in np.arange(0.5, D, bpm_period):
-    for off, amp in [(0, 1.0), (0.22, 0.65)]:
-        i = int((k + off) * SR); n = int(0.28 * SR)
-        if i + n < len(t):
-            tt = np.arange(n) / SR
-            beat[i:i + n] += amp * np.sin(2 * np.pi * (60 - 25 * tt) * tt) * np.exp(-tt * 14)
-rise = np.minimum(1, 0.5 + t / 40)
-music = (0.55 * pad + 0.35 * noise + 0.9 * beat * rise) * 0.55
-music = np.stack([music, np.roll(music, 380)], 1)
+# ---- trilha: suspense cinematográfico em Lá menor (Am - F - C - E), 100 BPM, 60s
+BPM = 100; beat = 60 / BPM; D = 60
+N = D * SR
+music = np.zeros(N)
+chords = [  # (baixo, arpejo)
+    (55.00, [220.00, 261.63, 329.63, 440.00]),
+    (43.65, [174.61, 220.00, 261.63, 349.23]),
+    (65.41, [261.63, 329.63, 392.00, 523.25]),
+    (82.41, [329.63, 415.30, 493.88, 659.25]),
+]
+
+def add(buf, start, sig, gain=1.0):
+    i = int(start * SR)
+    if i >= len(buf): return
+    n = min(len(sig), len(buf) - i)
+    buf[i:i + n] += gain * sig[:n]
+
+def pluck(f, dur=0.55):
+    t = np.arange(int(dur * SR)) / SR
+    x = np.sin(2 * np.pi * f * t) + 0.5 * np.sin(2 * np.pi * 2 * f * t) + 0.25 * np.sin(2 * np.pi * 3 * f * t)
+    return x * np.exp(-t * 6.5) * np.minimum(1, t / 0.004)
+
+def bass(f, dur):
+    t = np.arange(int(dur * SR)) / SR
+    return (np.sin(2 * np.pi * f * t) + 0.3 * np.sin(2 * np.pi * 2 * f * t)) * np.exp(-t * 1.6) * np.minimum(1, t / 0.01)
+
+def pad(freqs, dur):
+    t = np.arange(int(dur * SR)) / SR
+    x = sum(np.sin(2 * np.pi * f * (1 + 0.002 * np.sin(2 * np.pi * 0.3 * t)) * t) for f in freqs) / len(freqs)
+    return x * np.sin(np.pi * np.minimum(t / dur, 1)) ** 0.7
+
+def kick(dur=0.3):
+    t = np.arange(int(dur * SR)) / SR
+    return np.sin(2 * np.pi * (48 + 90 * np.exp(-t * 28)) * t) * np.exp(-t * 11)
+
+def hat(dur=0.05):
+    t = np.arange(int(dur * SR)) / SR
+    nz = rng.standard_normal(len(t))
+    return (nz - np.concatenate([[0], nz[:-1]])) * np.exp(-t * 70)
+
+bar = 4 * beat
+nbars = int(D / bar)
+for b in range(nbars):
+    root, arp = chords[(b // 1) % 4 if False else (b // 1) % 4]
+    t0 = b * bar
+    add(music, t0, bass(root, bar), 0.55)
+    add(music, t0, pad([root * 2, arp[0], arp[2]], bar * 1.05), 0.18)
+    intensity = min(1.0, 0.35 + b / 8)          # cresce ao longo do vídeo
+    pattern = [0, 1, 2, 3, 2, 1, 2, 3]            # arpejo em colcheias
+    for k, idx in enumerate(pattern):
+        add(music, t0 + k * beat / 2, pluck(arp[idx]), 0.22 * intensity)
+    for k in (0, 2):
+        add(music, t0 + k * beat, kick(), 0.55 * intensity)
+    if b >= 2:
+        for k in range(8):
+            add(music, t0 + k * beat / 2 + beat / 4, hat(), 0.10 * intensity)
+music *= 0.9
+# eco curto para dar espaço
+echo = np.zeros_like(music); d = int(0.19 * SR); echo[d:] = music[:-d] * 0.28
+music = music + echo
+music = np.stack([music, np.roll(music, 300)], 1)
+peak = np.max(np.abs(music)); music = music / peak * 0.85
 save("music", music)
 
 # ---- impacto (hit)

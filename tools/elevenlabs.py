@@ -7,12 +7,13 @@ Depois: npm run render
 import json, os, pathlib, re, subprocess, sys, urllib.request
 
 root = pathlib.Path(__file__).resolve().parent.parent
+EP = os.environ.get("EP", "ep01")  # ex.: EP=ep02
 key = os.environ["ELEVENLABS_API_KEY"]
 voice = sys.argv[1] if len(sys.argv) > 1 else "pNInz6obpgDQGcFmaJgB"  # Adam (grave). Teste também: Daniel onwK4e9ZLuTAKqWW03F9, Brian nPczCjzI2devNBz1zQrb
-out = root / "public" / "audio" / "shots"
+out = root / "public" / "audio" / EP / "shots"
 out.mkdir(parents=True, exist_ok=True)
 
-src = (root / "src" / "script.ts").read_text(encoding="utf-8")
+src = (root / "src" / "episodes" / f"{EP}.ts").read_text(encoding="utf-8")
 shots = re.findall(r"id: '([^']+)',\n\s+text: '((?:[^'\\]|\\.)*)'", src)
 durations = {}
 for i, (sid, text) in enumerate(shots):
@@ -29,5 +30,5 @@ for i, (sid, text) in enumerate(shots):
     d = float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(f)]))
     durations[sid] = round(d, 3)
     print(f"{i:02d} {sid}: {d:.2f}s")
-(root / "public" / "audio" / "durations.json").write_text(json.dumps(durations, indent=2))
+(root / "public" / "audio" / EP / "durations.json").write_text(json.dumps(durations, indent=2))
 print("ok -> npm run render")

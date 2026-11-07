@@ -3,7 +3,8 @@ import {continueRender, delayRender, interpolate, spring, useCurrentFrame, useVi
 import oswald600 from '@fontsource/oswald/files/oswald-latin-600-normal.woff2';
 import oswald700 from '@fontsource/oswald/files/oswald-latin-700-normal.woff2';
 import playfair800 from '@fontsource/playfair-display/files/playfair-display-latin-800-normal.woff2';
-import {Shot, parseTokens, shotFrames} from './script';
+import {Comment, Poll as PollT, Shot, parseTokens} from './script';
+import {useEp} from './ep';
 
 const loadFonts = () => {
   const h = delayRender('fonts');
@@ -28,14 +29,15 @@ const YELLOW = '#f7c61a';
 const RED = '#ff3b30';
 const COLORS = {white: '#ffffff', yellow: YELLOW, red: RED};
 
-const Tag = () => (
-  <div style={{position: 'absolute', left: 36, top: 118, fontFamily: 'OswaldX', fontWeight: 600, fontSize: 30, letterSpacing: 3, color: 'rgba(255,255,255,0.7)'}}>E SE #1</div>
-);
+const Tag = () => {
+  const {ep} = useEp();
+  return <div style={{position: 'absolute', left: 36, top: 118, fontFamily: 'OswaldX', fontWeight: 600, fontSize: 30, letterSpacing: 3, color: 'rgba(255,255,255,0.7)'}}>{ep.tag}</div>;
+};
 
 /** Legenda no centro-baixo, 2-3 palavras por vez, como no vídeo de referência. */
 const Caption = ({shot}: {shot: Shot}) => {
   const frame = useCurrentFrame();
-  const dur = shotFrames(shot);
+  const dur = useEp().frames(shot);
   const toks = useMemo(() => parseTokens(shot.text), [shot.text]);
   const pages = useMemo(() => {
     const out: typeof toks[] = [];
@@ -73,8 +75,8 @@ const Caption = ({shot}: {shot: Shot}) => {
 
 const Hud = ({shot}: {shot: Shot}) => {
   const frame = useCurrentFrame();
+  const dur = useEp().frames(shot);
   if (!shot.hud) return null;
-  const dur = shotFrames(shot);
   const {label, from, to, prefix = '', suffix = ''} = shot.hud;
   const v = Math.round(interpolate(frame, [0, dur * 0.8], [from, to], {extrapolateRight: 'clamp'}));
   const txt = prefix + v.toLocaleString('pt-BR') + suffix;
@@ -87,24 +89,59 @@ const Hud = ({shot}: {shot: Shot}) => {
   );
 };
 
-const Poll = ({instant}: {instant?: boolean}) => {
-  const frame = useCurrentFrame() + (instant ? 80 : 0);
+const OPT_COLORS = [
+  {bg: YELLOW, fg: '#1a1200'},
+  {bg: '#ff5a4d', fg: '#fff'},
+  {bg: '#3d8bff', fg: '#fff'},
+  {bg: '#35c46a', fg: '#fff'},
+];
+
+const Poll = ({poll, instant}: {poll: PollT; instant?: boolean}) => {
+  const frame = useCurrentFrame() + (instant ? 120 : 0);
   const a = interpolate(frame, [20, 34], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const btn = (bg: string, fg: string, txt: string, d: number) => {
+  const many = poll.options.length > 2;
+  const btn = (i: number, txt: string, d: number) => {
     const k = interpolate(frame, [d, d + 10], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+    const c = OPT_COLORS[i % OPT_COLORS.length];
     return (
-      <div style={{background: bg, color: fg, fontFamily: 'OswaldX', fontWeight: 700, fontSize: 64, textTransform: 'uppercase', padding: '14px 36px', borderRadius: 22, margin: '16px auto', width: 880, textAlign: 'center', transform: `scale(${0.8 + 0.2 * k})`, opacity: k, boxShadow: '0 8px 0 rgba(0,0,0,.45)'}}>{txt}</div>
+      <div key={i} style={{background: c.bg, color: c.fg, fontFamily: 'OswaldX', fontWeight: 700, fontSize: many ? 52 : 64, textTransform: 'uppercase', padding: many ? '10px 30px' : '14px 36px', borderRadius: 22, margin: many ? '12px auto' : '16px auto', width: 900, textAlign: 'center', transform: `scale(${0.8 + 0.2 * k})`, opacity: k, boxShadow: '0 8px 0 rgba(0,0,0,.45)'}}>{txt}</div>
     );
   };
+  const end = 30 + poll.options.length * 12;
   return (
-    <div style={{position: 'absolute', left: 0, right: 0, top: 250, textAlign: 'center', opacity: a}}>
-      <div style={{fontFamily: 'OswaldX', fontWeight: 700, fontSize: 96, color: '#fff', WebkitTextStroke: '10px #000', paintOrder: 'stroke fill', textShadow: '0 5px 0 #000'}}>
-        VOCÊ <span style={{color: YELLOW}}>TROCARIA?</span>
+    <div style={{position: 'absolute', left: 0, right: 0, top: many ? 200 : 250, textAlign: 'center', opacity: a}}>
+      <div style={{fontFamily: 'OswaldX', fontWeight: 700, fontSize: many ? 88 : 96, color: '#fff', WebkitTextStroke: '10px #000', paintOrder: 'stroke fill', textShadow: '0 5px 0 #000'}}>
+        {poll.title} {poll.highlight && <span style={{color: YELLOW}}>{poll.highlight}</span>}
       </div>
-      {btn(YELLOW, '#1a1200', 'A · sim, a família dele', 30)}
-      {btn('#ff5a4d', '#fff', 'B · não, as vítimas', 42)}
-      <div style={{fontFamily: 'OswaldX', fontWeight: 600, fontSize: 40, color: '#fff', textTransform: 'uppercase', marginTop: 10, textShadow: '0 3px 0 #000', opacity: interpolate(frame, [54, 64], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})}}>
-        Comenta A ou B 👇
+      {poll.options.map((o, i) => btn(i, o, 30 + i * 12))}
+      {poll.footer && (
+        <div style={{fontFamily: 'OswaldX', fontWeight: 600, fontSize: 40, color: '#fff', textTransform: 'uppercase', marginTop: 10, textShadow: '0 3px 0 #000', opacity: interpolate(frame, [end, end + 10], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})}}>
+          {poll.footer}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/** Card de comentário no estilo do app (para "responder com vídeo"). */
+const CommentCard = ({c, instant}: {c: Comment; instant?: boolean}) => {
+  const frame = useCurrentFrame() + (instant ? 60 : 0);
+  const {fps} = useVideoConfig();
+  const k = spring({frame: frame - 3, fps, config: {damping: 12, stiffness: 160}});
+  const initial = c.user.replace('@', '').charAt(0).toUpperCase();
+  return (
+    <div style={{position: 'absolute', left: 60, right: 60, top: 560, transform: `scale(${0.7 + 0.3 * k}) rotate(${(1 - k) * -4}deg)`, opacity: Math.min(1, k * 1.4)}}>
+      <div style={{background: 'rgba(24,25,28,0.96)', borderRadius: 34, padding: '30px 34px', display: 'flex', gap: 26, boxShadow: '0 18px 40px rgba(0,0,0,.6)', border: '3px solid rgba(255,255,255,.08)'}}>
+        <div style={{flex: '0 0 auto', width: 104, height: 104, borderRadius: 52, padding: 5, background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf)'}}>
+          <div style={{width: '100%', height: '100%', borderRadius: 50, background: '#2b2d33', border: '4px solid #18191c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'OswaldX', fontWeight: 700, fontSize: 52, color: '#fff'}}>{initial}</div>
+        </div>
+        <div style={{flex: 1, fontFamily: 'Helvetica, Arial, sans-serif', color: '#fff'}}>
+          <div style={{fontSize: 36, fontWeight: 700}}>
+            {c.user.replace('@', '')} <span style={{fontWeight: 400, color: '#9aa0aa'}}>{c.ago ?? '7 h'} · <span style={{color: '#ff3040'}}>❤</span> pelo autor</span>
+          </div>
+          <div style={{fontSize: 44, lineHeight: 1.25, marginTop: 8}}>{c.text}</div>
+        </div>
+        <div style={{flex: '0 0 auto', color: '#ff3040', fontSize: 48, alignSelf: 'center'}}>❤</div>
       </div>
     </div>
   );
@@ -152,7 +189,8 @@ export const Overlay = ({shot}: {shot: Shot}) => (
     <Tag />
     {shot.banner && <Banner text={shot.banner} />}
     <Hud shot={shot} />
-    {shot.poll ? <Poll instant={shot.cta} /> : <Caption shot={shot} />}
+    {shot.comment && <CommentCard c={shot.comment} instant={!shot.banner} />}
+    {shot.poll ? <Poll poll={shot.poll} instant={shot.cta} /> : <Caption shot={shot} />}
     {shot.cta && (
       <>
         <Caption shot={shot} />

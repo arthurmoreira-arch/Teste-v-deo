@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 """Gera a narração (voz de IA pt-BR, Piper) de cada plano e as durações em public/audio/durations.json.
-Uso: python3 tools/gerar-voz.py   (precisa: pip install piper-tts, ffmpeg)
+Uso: python3 tools/gerar-voz.py ep02   (precisa: pip install piper-tts, ffmpeg)
 """
 import json, re, subprocess, sys, pathlib
 
 root = pathlib.Path(__file__).resolve().parent.parent
 model = root / "tools" / "pt_BR-faber-medium.onnx"
-out = root / "public" / "audio" / "shots"
-out.mkdir(parents=True, exist_ok=True)
 
-src = (root / "src" / "script.ts").read_text(encoding="utf-8")
+ep = sys.argv[1] if len(sys.argv) > 1 else "ep01"
+src = (root / "src" / "episodes" / f"{ep}.ts").read_text(encoding="utf-8")
 shots = re.findall(r"id: '([^']+)',\n\s+text: '((?:[^'\\]|\\.)*)'", src)
+out = root / "public" / "audio" / ep / "shots"
+out.mkdir(parents=True, exist_ok=True)
 if not shots:
     sys.exit("não achei os shots em src/script.ts")
 
 # pronúncia: ajuda o TTS com nomes em inglês
-FIX = {"Red John": "Réd Djón", "Patrick Jane": "Pátrick Djêin", "Jane": "Djêin", "CBI": "Cê Bê Í", "Charlotte": "Charlót", "Lisbon": "Lísbon", "parte dois": "parte dois"}
+FIX = {"@lyncowndetona": "Lincôun detona", "Red John": "Réd Djón", "Patrick Jane": "Pátrick Djêin", "Jane": "Djêin", "CBI": "Cê Bê Í", "Charlotte": "Charlót", "Lisbon": "Lísbon", "parte dois": "parte dois"}
 
 # cadeia de áudio: limpa graves, realça presença, comprime e sobe para 44,1 kHz (som de "locutor")
 AF = "highpass=f=70,equalizer=f=150:t=q:w=1:g=2,equalizer=f=3500:t=q:w=1.2:g=2.5,acompressor=threshold=-21dB:ratio=3:attack=4:release=90,loudnorm=I=-15:TP=-1.5,aresample=44100"
@@ -37,5 +38,5 @@ for i, (sid, text) in enumerate(shots):
     raw.unlink()
     print(f"{i:02d} {sid}: {d:.2f}s")
 
-(root / "public" / "audio" / "durations.json").write_text(json.dumps(durations, indent=2), encoding="utf-8")
+(root / "public" / "audio" / ep / "durations.json").write_text(json.dumps(durations, indent=2), encoding="utf-8")
 print("ok")

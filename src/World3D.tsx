@@ -5,7 +5,8 @@ import {useThree} from '@react-three/fiber';
 import * as THREE from 'three';
 import {Character} from './characters';
 import {City, House, Living, Office, Street, Studio} from './envs';
-import {Shot, V3, shotFrames, shots, starts} from './script';
+import {Shot, V3} from './script';
+import {useEp} from './ep';
 
 const MOODS = {
   warm: {amb: '#ffd9a8', ambI: 0.75, dir: '#ffcf99', dirI: 1.8, sky: '#1a1226'},
@@ -36,11 +37,13 @@ const Rig = ({shot, k, local}: {shot: Shot; k: number; local: number}) => {
 export const World3D = () => {
   const frame = useCurrentFrame();
   const {width, height, fps} = useVideoConfig();
+  const {ep, frames, starts} = useEp();
+  const shots = ep.shots;
   let idx = shots.length - 1;
-  for (let i = 0; i < shots.length; i++) if (frame < starts[i] + shotFrames(shots[i])) { idx = i; break; }
+  for (let i = 0; i < shots.length; i++) if (frame < starts[i] + frames(shots[i])) { idx = i; break; }
   const shot = shots[idx];
   const local = frame - starts[idx];
-  const dur = shotFrames(shot);
+  const dur = frames(shot);
   const k = interpolate(local, [0, dur], [0, 1], {easing: Easing.inOut(Easing.quad), extrapolateRight: 'clamp'});
   const t = frame / fps;
   const m = MOODS[shot.mood ?? 'warm'];
@@ -72,9 +75,9 @@ export const World3D = () => {
       {shot.env === 'studio' && <spotLight position={[0, 9, 4]} angle={0.55} penumbra={0.6} intensity={shot.mood === 'cold' ? 180 : 260} color={shot.mood === 'cold' ? '#bcd0ff' : '#fff0c8'} castShadow target-position={[0, 0, 0]} />}
       {shot.env === 'studio' && <Studio crowd={shot.envProps?.crowd} cry={shot.envProps?.cry} t={t} />}
       {shot.env === 'living' && <Living />}
-      {shot.env === 'office' && <Office />}
+      {shot.env === 'office' && <Office board={shot.envProps?.board} />}
       {shot.env === 'city' && <City night={night} />}
-      {shot.env === 'house' && <House t={t} />}
+      {shot.env === 'house' && <House t={t} {...shot.envProps} />}
       {shot.env === 'street' && <Street crowd={shot.envProps?.crowd} t={t} night={night} />}
       {shot.env === 'city' && (
         <group position={[0, 17, -26]} rotation={[-0.08, 0, 0]} scale={1.7}>

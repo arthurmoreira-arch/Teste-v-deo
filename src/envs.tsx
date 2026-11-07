@@ -116,8 +116,37 @@ export const Living = () => {
 };
 
 // ---------------------------------------------------------------- office
-export const Office = () => (
+const BoardFull = () => {
+  const pins = useMemo(() => Array.from({length: 22}).map((_, i) => ({x: -2.3 + rnd(i + 40) * 4.6, y: 1.35 + rnd(i + 80) * 2.3, c: ['#f2f2f2', '#e8e0c8', '#cfd8e8'][i % 3], w: 0.35 + rnd(i) * 0.25})), []);
+  return (
+    <group position={[0, 0, -3.88]}>
+      {pins.map((p, i) => (
+        <group key={i}>
+          <Box p={[p.x, p.y, 0]} s={[p.w, p.w * 1.2, 0.02]} c={p.c} />
+          <mesh position={[p.x, p.y + p.w * 0.5, 0.03]}><sphereGeometry args={[0.04, 8, 6]} /><meshBasicMaterial color="#d01010" /></mesh>
+        </group>
+      ))}
+      {pins.slice(0, 14).map((p, i) => {
+        const q = pins[(i * 5 + 3) % pins.length];
+        const dx = q.x - p.x, dy = q.y - p.y;
+        const len = Math.hypot(dx, dy);
+        return (
+          <mesh key={`s${i}`} position={[(p.x + q.x) / 2, (p.y + q.y) / 2 + 0.15, 0.04]} rotation={[0, 0, Math.atan2(dy, dx)]}>
+            <boxGeometry args={[len, 0.018, 0.01]} />
+            <meshBasicMaterial color="#c00000" />
+          </mesh>
+        );
+      })}
+      <group position={[0, 2.5, 0.06]}>
+        <DrawnSmiley r={0.42} flick={0.6} />
+      </group>
+    </group>
+  );
+};
+
+export const Office = ({board}: {board?: 'empty' | 'full'}) => (
   <group>
+    {board === 'full' && <BoardFull />}
     <Box p={[0, -0.1, 0]} s={[16, 0.2, 14]} c="#858c96" />
     <Box p={[0, 2.5, -4.2]} s={[16, 5, 0.3]} c="#c3ccd8" />
     <Box p={[0, 2.5, -4.0]} s={[5.6, 3.0, 0.1]} c="#5b4630" />
@@ -186,7 +215,29 @@ export const City = ({night}: {night: number}) => {
 };
 
 // ---------------------------------------------------------------- house (night, red window)
-export const House = ({t}: {t: number}) => {
+const DrawnSmiley = ({r = 0.55, flick = 1}: {r?: number; flick?: number}) => (
+  <group>
+    <mesh>
+      <torusGeometry args={[r, r * 0.08, 8, 32]} />
+      <meshStandardMaterial color="#c0090f" emissive="#ff0000" emissiveIntensity={flick} />
+    </mesh>
+    <mesh position={[-r * 0.36, r * 0.3, 0]} scale={[0.8, 1.3, 1]}><circleGeometry args={[r * 0.11, 12]} /><meshBasicMaterial color="#d40f15" /></mesh>
+    <mesh position={[r * 0.36, r * 0.3, 0]} scale={[0.8, 1.3, 1]}><circleGeometry args={[r * 0.11, 12]} /><meshBasicMaterial color="#d40f15" /></mesh>
+    <mesh position={[0, -r * 0.05, 0]} rotation={[0, 0, Math.PI * 1.5 - Math.PI * 0.425]}>
+      <torusGeometry args={[r * 0.52, r * 0.07, 8, 24, Math.PI * 0.85]} />
+      <meshStandardMaterial color="#c0090f" emissive="#ff0000" emissiveIntensity={flick} />
+    </mesh>
+    {[-0.6, -0.2, 0.45].map((x, i) => (
+      <mesh key={i} position={[x * r, -r * (0.75 + i * 0.08), 0]}>
+        <boxGeometry args={[r * 0.05, r * (0.3 + i * 0.12), 0.01]} />
+        <meshBasicMaterial color="#b00810" />
+      </mesh>
+    ))}
+  </group>
+);
+
+type HouseProps = {t: number; windowSmiley?: boolean; doorSmiley?: boolean; tape?: boolean; warm?: boolean};
+export const House = ({t, windowSmiley, doorSmiley, tape, warm}: HouseProps) => {
   const flick = 1.2 + Math.sin(t * 9) * 0.25 + (Math.sin(t * 23) > 0.9 ? -0.6 : 0);
   return (
     <group>
@@ -198,20 +249,34 @@ export const House = ({t}: {t: number}) => {
       </mesh>
       <Box p={[1.6, 1.1, 2.52]} s={[1.1, 2.2, 0.08]} c="#3b2616" />
       <Box p={[-1.6, 2.4, 2.52]} s={[1.5, 1.5, 0.08]} c="#0b0b0f" />
-      {/* smiley vermelho na janela */}
-      <group position={[-1.6, 2.4, 2.6]}>
-        <mesh>
-          <torusGeometry args={[0.55, 0.045, 8, 32]} />
-          <meshStandardMaterial color="#e01010" emissive="#ff0000" emissiveIntensity={flick} />
-        </mesh>
-        <mesh position={[-0.2, 0.17, 0]}><circleGeometry args={[0.06, 12]} /><meshBasicMaterial color="#ff2020" /></mesh>
-        <mesh position={[0.2, 0.17, 0]}><circleGeometry args={[0.06, 12]} /><meshBasicMaterial color="#ff2020" /></mesh>
-        <mesh position={[0, -0.05, 0]} rotation={[0, 0, Math.PI]}>
-          <torusGeometry args={[0.28, 0.04, 8, 24, Math.PI]} />
-          <meshStandardMaterial color="#e01010" emissive="#ff0000" emissiveIntensity={flick} />
-        </mesh>
-      </group>
-      <pointLight position={[-1.6, 2.4, 5.5]} color="#ff1a1a" intensity={9 * flick} distance={9} />
+      {windowSmiley && (
+        <group position={[-1.6, 2.4, 2.6]}>
+          <DrawnSmiley r={0.55} flick={flick} />
+        </group>
+      )}
+      {windowSmiley && <pointLight position={[-1.6, 2.4, 5.5]} color="#ff1a1a" intensity={9 * flick} distance={9} />}
+      {warm && !windowSmiley && <Box p={[-1.6, 2.4, 2.57]} s={[1.3, 1.3, 0.04]} c="#ffcf7a" e="#ffb54a" ei={1.4} />}
+      {warm && <pointLight position={[-1.6, 2.4, 4]} color="#ffb54a" intensity={6} distance={8} />}
+      {doorSmiley && (
+        <group position={[1.6, 1.5, 2.58]}>
+          <DrawnSmiley r={0.38} flick={0.9} />
+          <pointLight position={[0, 0, 1.5]} color="#ff2a2a" intensity={5} distance={5} />
+        </group>
+      )}
+      {tape && (
+        <group>
+          {[-3.2, 3.2].map((x) => <Box key={x} p={[x, 0.6, 5]} s={[0.12, 1.2, 0.12]} c="#888" />)}
+          <Box p={[0, 1.0, 5]} s={[6.4, 0.16, 0.03]} c="#ffd400" e="#5a4a00" ei={0.4} />
+          <Box p={[0, 0.7, 5.02]} s={[6.4, 0.16, 0.03]} c="#ffd400" e="#5a4a00" ei={0.4} r={[0, 0, 0.04]} />
+          {[-1.2, 1.2].map((x) => (
+            <mesh key={x} position={[x, 3.2, 7]} >
+              <sphereGeometry args={[0.12, 10, 8]} />
+              <meshBasicMaterial color={Math.sin(t * 8 + x) > 0 ? '#ff2020' : '#2050ff'} />
+            </mesh>
+          ))}
+          <pointLight position={[0, 3, 7]} color={Math.sin(t * 8) > 0 ? '#ff2020' : '#2050ff'} intensity={14} distance={14} />
+        </group>
+      )}
       <Box p={[1.6, 2.4, 2.52]} s={[0, 0, 0]} c="#000" />
       <Tree p={[-5.5, 0, 2]} s={1.5} />
       <Tree p={[6, 0, 3]} s={1.3} />

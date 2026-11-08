@@ -79,7 +79,7 @@ export const World3D = () => {
       {shot.env === 'city' && <City night={night} />}
       {shot.env === 'house' && <House t={t} {...shot.envProps} />}
       {shot.env === 'street' && <Street crowd={shot.envProps?.crowd} t={t} night={night} />}
-      {shot.env === 'city' && (
+      {shot.env === 'city' && night > 0.5 && (
         <group position={[0, 17, -26]} rotation={[-0.08, 0, 0]} scale={1.7}>
           <mesh><torusGeometry args={[5, 0.35, 12, 48]} /><meshStandardMaterial color="#e01010" emissive="#ff0000" emissiveIntensity={1.6} /></mesh>
           <mesh position={[-1.7, 1.6, 0]}><circleGeometry args={[0.5, 16]} /><meshBasicMaterial color="#ff2020" /></mesh>

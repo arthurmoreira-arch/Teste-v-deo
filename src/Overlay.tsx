@@ -3,7 +3,7 @@ import {continueRender, delayRender, interpolate, spring, useCurrentFrame, useVi
 import oswald600 from '@fontsource/oswald/files/oswald-latin-600-normal.woff2';
 import oswald700 from '@fontsource/oswald/files/oswald-latin-700-normal.woff2';
 import playfair800 from '@fontsource/playfair-display/files/playfair-display-latin-800-normal.woff2';
-import {Comment, Poll as PollT, Shot, parseTokens} from './script';
+import {Comment, Poll as PollT, Shot, Thought, TitleLine, parseTokens} from './script';
 import {useEp} from './ep';
 
 const loadFonts = () => {
@@ -74,6 +74,7 @@ const Caption = ({shot}: {shot: Shot}) => {
 };
 
 const Hud = ({shot}: {shot: Shot}) => {
+  const top = shot.titleBar ? 560 : 320;
   const frame = useCurrentFrame();
   const dur = useEp().frames(shot);
   if (!shot.hud) return null;
@@ -82,7 +83,7 @@ const Hud = ({shot}: {shot: Shot}) => {
   const txt = prefix + v.toLocaleString('pt-BR') + suffix;
   const pop = interpolate(frame, [0, 8], [0, 1], {extrapolateRight: 'clamp'});
   return (
-    <div style={{position: 'absolute', left: 36, top: 320, opacity: pop, transform: `translateY(${(1 - pop) * 20}px)`}}>
+    <div style={{position: 'absolute', left: 36, top, opacity: pop, transform: `translateY(${(1 - pop) * 20}px)`}}>
       <div style={{fontFamily: 'OswaldX', fontWeight: 600, fontSize: 32, letterSpacing: 4, color: 'rgba(255,255,255,0.8)', textShadow: '0 2px 0 #000'}}>{label}</div>
       <div style={{fontFamily: 'PlayfairX', fontWeight: 800, fontSize: 78, color: YELLOW, WebkitTextStroke: '6px #1a1200', paintOrder: 'stroke fill', textShadow: '0 4px 0 #1a1200'}}>{txt}</div>
     </div>
@@ -184,10 +185,53 @@ const Banner = ({text}: {text: string}) => {
   );
 };
 
+/** Faixa escura no topo com a premissa em 3 linhas coloridas (igual ao vídeo viral de referência). */
+const TitleBar = ({lines}: {lines: TitleLine[]}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  return (
+    <div style={{position: 'absolute', left: 0, right: 0, top: 0, paddingTop: 150, paddingBottom: 26, background: 'linear-gradient(#0d0f1a 82%, rgba(13,15,26,0))', textAlign: 'center'}}>
+      {lines.map((l, i) => {
+        const k = spring({frame: frame - i * 6, fps, config: {damping: 11, stiffness: 190}});
+        return (
+          <div key={i} style={{fontFamily: 'OswaldX', fontWeight: 700, fontSize: 108, lineHeight: 1.0, textTransform: 'uppercase', color: COLORS[l.c ?? 'white'], WebkitTextStroke: '10px #000', paintOrder: 'stroke fill', textShadow: '0 6px 0 #000', transform: `scale(${k})`}}>
+            {l.t}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+/** Balões de pensamento ("ouvir a mente" dos personagens). */
+const Thoughts = ({items}: {items: Thought[]}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  return (
+    <>
+      {items.map((th, i) => {
+        const k = spring({frame: frame - (th.at ?? 6 + i * 5), fps, config: {damping: 10, stiffness: 170}});
+        const bob = Math.sin((frame + i * 13) / 9) * 6;
+        return (
+          <div key={i} style={{position: 'absolute', left: `${th.x}%`, top: th.y + bob, transform: `translateX(-50%) scale(${Math.max(0, k)})`, transformOrigin: 'bottom center'}}>
+            <div style={{background: th.red ? '#14070a' : '#ffffff', color: th.red ? '#ff3030' : '#16161c', border: `6px solid ${th.red ? '#ff2a2a' : '#000'}`, borderRadius: 60, padding: '22px 38px', fontFamily: 'OswaldX', fontWeight: 700, fontSize: 58, textTransform: 'uppercase', whiteSpace: 'nowrap', boxShadow: th.red ? '0 0 40px rgba(255,0,0,.6)' : '0 10px 0 rgba(0,0,0,.35)'}}>
+              💭 {th.text}
+            </div>
+            <div style={{width: 34, height: 34, borderRadius: 17, background: th.red ? '#14070a' : '#fff', border: `5px solid ${th.red ? '#ff2a2a' : '#000'}`, margin: '8px 0 0 70px'}} />
+            <div style={{width: 18, height: 18, borderRadius: 9, background: th.red ? '#14070a' : '#fff', border: `4px solid ${th.red ? '#ff2a2a' : '#000'}`, margin: '6px 0 0 96px'}} />
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
 export const Overlay = ({shot}: {shot: Shot}) => (
   <>
     <Tag />
     {shot.banner && <Banner text={shot.banner} />}
+    {shot.titleBar && <TitleBar lines={shot.titleBar} />}
+    {shot.thoughts && <Thoughts items={shot.thoughts} />}
     <Hud shot={shot} />
     {shot.comment && <CommentCard c={shot.comment} instant={!shot.banner} />}
     {shot.poll ? <Poll poll={shot.poll} instant={shot.cta} /> : <Caption shot={shot} />}

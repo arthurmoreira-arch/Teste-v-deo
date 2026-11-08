@@ -9,7 +9,7 @@ export const WORDS_PER_SECOND = 2.8;
 export type V3 = [number, number, number];
 export type Cam = {p: V3; l: V3};
 export type Env = 'studio' | 'living' | 'office' | 'city' | 'house' | 'street';
-export type Who = 'jane' | 'angela' | 'charlotte' | 'lisbon' | 'redjohn' | 'mannequin';
+export type Who = 'jane' | 'angela' | 'charlotte' | 'lisbon' | 'redjohn' | 'mannequin' | 'voce' | 'mae' | 'chefe';
 export type Pose = 'stand' | 'walk' | 'sit' | 'zombie' | 'cry' | 'clap';
 export type Face = 'neutral' | 'smirk' | 'shock' | 'sad' | 'angry' | 'talk';
 
@@ -26,6 +26,8 @@ export type Actor = {
 export type Hud = {label: string; from: number; to: number; prefix?: string; suffix?: string};
 
 export type Poll = {title: string; highlight?: string; options: string[]; footer?: string};
+export type TitleLine = {t: string; c?: 'white' | 'yellow' | 'red'};
+export type Thought = {text: string; x: number; y: number; red?: boolean; at?: number};
 export type Comment = {user: string; text: string; ago?: string};
 
 export type Shot = {
@@ -40,6 +42,8 @@ export type Shot = {
   hud?: Hud;
   poll?: Poll; // enquete no topo (2 a 4 opções)
   comment?: Comment; // card de comentário de seguidor
+  titleBar?: TitleLine[]; // faixa escura no topo com a premissa (como no vídeo de referência)
+  thoughts?: Thought[]; // balões de pensamento na tela
   banner?: string; // título de gancho no topo (primeiros 2s)
   sfx?: 'hit' | 'whoosh'; // efeito sonoro no início do plano
   cta?: boolean; // chamada final: curtir, seguir, votar

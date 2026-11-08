@@ -61,17 +61,20 @@ const LOOKS: Record<Exclude<Who, 'mannequin' | 'redjohn'>, Look> = {
   jane: {skin: '#f1b98c', hair: 'jane', hairColor: '#e7c04a', top: '#2c3c5a', sleeves: '#4a5d84', pants: '#37425d', tie: '#b3121b', scale: 1},
   angela: {skin: '#f1b98c', hair: 'long', hairColor: '#6a4025', top: '#d4506f', sleeves: '#d4506f', pants: '#d4506f', dress: true, scale: 0.95},
   charlotte: {skin: '#f1b98c', hair: 'pigtails', hairColor: '#6a4025', top: '#f1c04b', sleeves: '#f1c04b', pants: '#f1c04b', dress: true, scale: 0.55},
+  voce: {skin: '#e7a65e', hair: 'short', hairColor: '#1c120c', top: '#e8392a', sleeves: '#e8392a', pants: '#2a4a9a', scale: 1},
+  mae: {skin: '#8a5530', hair: 'short', hairColor: '#120c08', top: '#8e4fc4', sleeves: '#8e4fc4', pants: '#8e4fc4', dress: true, scale: 0.96},
+  chefe: {skin: '#f0c09a', hair: 'short', hairColor: '#8d8d8d', top: '#3a3f4a', sleeves: '#3a3f4a', pants: '#2a2e36', tie: '#2a6fd1', scale: 1.04},
   lisbon: {skin: '#ecb48d', hair: 'long', hairColor: '#2a1a12', top: '#5d5d68', sleeves: '#5d5d68', pants: '#24242c', scale: 0.97},
 };
 
-const Eye = ({x, look, face}: {x: number; look: number; face: Face}) => (
-  <group position={[x, 0.05, 0.3]}>
+const Eye = ({x, look, face, blink = 1}: {x: number; look: number; face: Face; blink?: number}) => (
+  <group position={[x, 0.05, 0.3]} scale={[1, blink, 1]}>
     <Part kind="sphere" args={[0.105]} color="#ffffff" scale={[1, 1.25, 0.5]} outline={1.12} />
     <Part kind="sphere" args={[0.05]} color={BLACK} pos={[look * 0.03, 0, 0.05]} scale={[1, 1.2, 0.6]} outline={1} />
   </group>
 );
 
-const Face_ = ({face, redjohn, t}: {face: Face; redjohn?: boolean; t: number}) => {
+const Face_ = ({face, redjohn, t, seed = 0}: {face: Face; redjohn?: boolean; t: number; seed?: number}) => {
   if (redjohn) {
     // Smiley pintado com sangue (assinatura do Red John): anel, dois olhos, sorriso largo e pingos
     const blood = <meshStandardMaterial color="#8f0a0e" roughness={0.35} emissive="#5a0000" emissiveIntensity={0.5} />;
@@ -106,13 +109,15 @@ const Face_ = ({face, redjohn, t}: {face: Face; redjohn?: boolean; t: number}) =
       </group>
     );
   }
+  const cyc = (t + seed * 1.37) % 3.6;
+  const blink = face === 'shock' ? 1 : cyc < 0.12 ? 0.12 : 1;
   const browY = face === 'shock' ? 0.2 : 0.17;
   const browTilt = face === 'sad' ? 0.35 : face === 'angry' ? -0.4 : face === 'smirk' ? -0.12 : 0;
   const talkOpen = face === 'talk' ? 0.015 + Math.abs(Math.sin(t * 11)) * 0.045 : 0;
   return (
     <group>
-      <Eye x={-0.13} look={face === 'shock' ? 0 : 0.6} face={face} />
-      <Eye x={0.13} look={face === 'shock' ? 0 : 0.6} face={face} />
+      <Eye x={-0.13} look={face === 'shock' ? 0 : 0.6} face={face} blink={blink} />
+      <Eye x={0.13} look={face === 'shock' ? 0 : 0.6} face={face} blink={blink} />
       <Part kind="box" args={[0.16, 0.035, 0.03]} color={BLACK} pos={[-0.13, browY + 0.03, 0.32]} rot={[0, 0, browTilt]} outline={1} />
       <Part kind="box" args={[0.16, 0.035, 0.03]} color={BLACK} pos={[0.13, browY + 0.03, 0.32]} rot={[0, 0, -browTilt]} outline={1} />
       {face === 'shock' ? (
@@ -227,7 +232,7 @@ export const Character = ({a, t}: {a: Actor; t: number}) => {
         {/* cabeça */}
         <group position={[0, 1.7, 0]} rotation={[headTilt, Math.sin(t * 0.9) * 0.06, 0]}>
           <Part kind="sphere" args={[0.34]} color={look.skin} scale={[1, 1.03, 1]} outline={1.07} />
-          {!isMan && <Face_ face={face} redjohn={isRJ} t={t} />}
+          {!isMan && <Face_ face={face} redjohn={isRJ} t={t} seed={who.length * 0.71 + (a.scale ?? 1)} />}
           <Hair type={look.hair} color={hairColor} />
         </group>
       </group>

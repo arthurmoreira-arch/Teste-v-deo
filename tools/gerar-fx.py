@@ -90,6 +90,19 @@ music = np.stack([music, np.roll(music, 300)], 1)
 peak = np.max(np.abs(music)); music = music / peak * 0.85
 save("music", music)
 
+# ---- tensão: drone grave + agudo dissonante + batimento lento (planos de suspense)
+D2 = 12; t = np.arange(D2 * SR) / SR
+ten = 0.5 * np.sin(2 * np.pi * 41.2 * t) + 0.25 * np.sin(2 * np.pi * 43.65 * t)
+ten += 0.06 * np.sin(2 * np.pi * 1244.5 * t) * (0.5 + 0.5 * np.sin(2 * np.pi * 0.25 * t))
+ten += 0.05 * np.sin(2 * np.pi * 1318.5 * t)
+for k in np.arange(0.3, D2, 1.4):
+    i = int(k * SR); n = int(0.3 * SR)
+    if i + n < len(t):
+        tt = np.arange(n) / SR
+        ten[i:i + n] += 0.9 * np.sin(2 * np.pi * (55 - 20 * tt) * tt) * np.exp(-tt * 12)
+ten *= np.minimum(1, t / 0.4)
+save("tension", ten / np.max(np.abs(ten)) * 0.8)
+
 # ---- impacto (hit)
 n = int(1.6 * SR); tt = np.arange(n) / SR
 hit = np.sin(2 * np.pi * (150 * np.exp(-tt * 3.2) + 32) * tt) * np.exp(-tt * 3.0)

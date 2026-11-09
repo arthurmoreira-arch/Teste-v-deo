@@ -3,6 +3,7 @@
 // Ajustes vindos dos insights do ep. 3: capa legível no quadro 0, pergunta no meio, pedido de envio mais cedo,
 // promessa da parte 3 (motivo pra seguir) e final que emenda no começo (loop).
 import durations from '../../public/audio/ep04/durations.json';
+import lines from '../../public/audio/ep04/lines.json';
 import {Actor, Episode, Poll, Shot} from '../script';
 
 const V = (o: Partial<Actor> = {}): Actor => ({who: 'voce', pos: [0, 0, 0], ...o});
@@ -19,6 +20,7 @@ export const shots: Shot[] = [
   {
     id: 'gancho',
     text: 'Você fingiu que *não ouviu.* E continuou andando.',
+    tone: 'suspense',
     env: 'street',
     mood: 'cold',
     night: 0.4,
@@ -35,7 +37,8 @@ export const shots: Shot[] = [
   },
   {
     id: 'atras',
-    text: 'Mas atrás de você, os pensamentos dele *não param.*',
+    text: 'Mas atrás de você, os pensamentos dele *não param.* {redjohn:Ele tá fingindo...}',
+    tone: 'suspense',
     env: 'street',
     mood: 'cold',
     night: 0.4,
@@ -45,11 +48,11 @@ export const shots: Shot[] = [
       {p: [0, 1.9, 4.2], l: [0.3, 1.5, -3]},
     ],
     envProps: {crowd: 1},
-    thoughts: [{text: 'ele tá fingindo...', x: 62, y: 520, red: true, at: 30}],
+    thoughts: [{text: 'ele tá fingindo...', x: 62, y: 520, red: true}],
   },
   {
     id: 'casa',
-    text: 'Em casa, você tenta agir normal. Mas sua mãe percebe.',
+    text: 'Em casa, você tenta agir normal. Mas sua mãe percebe. {mae:Ele tá estranho hoje.}',
     env: 'living',
     mood: 'warm',
     cast: [
@@ -60,11 +63,12 @@ export const shots: Shot[] = [
       {p: [0.3, 1.9, 5.2], l: [-0.1, 1.2, -0.6]},
       {p: [0.3, 1.8, 4.3], l: [-0.1, 1.25, -0.7]},
     ],
-    thoughts: [{text: 'ele tá estranho hoje', x: 62, y: 470, at: 40}],
+    thoughts: [{text: 'ele tá estranho hoje', x: 62, y: 470}],
   },
   {
     id: 'madrugada',
     text: 'Três da manhã. Você ouve um pensamento vindo de fora da *janela.*',
+    tone: 'suspense',
     env: 'living',
     mood: 'cold',
     cast: [V({pos: [0, 0, -1.6], face: 'shock', pose: 'sit'})],
@@ -77,7 +81,8 @@ export const shots: Shot[] = [
   },
   {
     id: 'seguiu',
-    text: '!Ele te seguiu até em casa.!',
+    text: '!Ele te seguiu até em casa.! {redjohn:Achei você.}',
+    tone: 'suspense',
     env: 'house',
     night: 1,
     mood: 'cold',
@@ -87,12 +92,13 @@ export const shots: Shot[] = [
       {p: [0.5, 1.95, 5.6], l: [1.6, 1.8, 8]},
     ],
     envProps: {warm: true},
-    thoughts: [{text: 'achei você', x: 58, y: 420, red: true, at: 10}],
+    thoughts: [{text: 'achei você', x: 58, y: 420, red: true}],
     sfx: 'hit',
   },
   {
     id: 'pergunta',
     text: 'E ele tá parado ali, olhando pra *sua porta.*',
+    tone: 'suspense',
     env: 'house',
     night: 1,
     mood: 'cold',
@@ -107,6 +113,7 @@ export const shots: Shot[] = [
   {
     id: 'virada',
     text: 'Só que tem uma coisa que ele *não sabe.*',
+    tone: 'suspense',
     env: 'living',
     mood: 'cold',
     cast: [V({pos: [0, 0, -1.6], face: 'neutral', pose: 'sit'})],
@@ -117,7 +124,7 @@ export const shots: Shot[] = [
   },
   {
     id: 'medo',
-    text: 'Você também ouve o *medo* dele.',
+    text: 'Você também ouve o *medo* dele. {redjohn:E se ele contar pra alguém?}',
     env: 'street',
     mood: 'cold',
     night: 0.4,
@@ -127,12 +134,12 @@ export const shots: Shot[] = [
       {p: [0, 1.82, -0.1], l: [0, 1.8, -2.2]},
     ],
     envProps: {crowd: 1},
-    thoughts: [{text: 'e se ele contar pra alguém?', x: 50, y: 300, red: true, at: 8}],
+    thoughts: [{text: 'e se ele contar pra alguém?', x: 50, y: 300, red: true}],
     sfx: 'hit',
   },
   {
     id: 'poder',
-    text: 'Pela primeira vez, o Red John tem *medo de alguém.* E esse alguém é !você.!',
+    text: 'Pela primeira vez, o Red John tem *medo de alguém.* E esse alguém é !você.! {voce:Agora é a minha vez.}',
     env: 'living',
     mood: 'warm',
     cast: [V({pos: [0, 0, -1.6], face: 'smirk', pose: 'sit'})],
@@ -173,4 +180,4 @@ export const shots: Shot[] = [
   },
 ];
 
-export const ep04: Episode = {id: 'ep04', tag: 'E SE #4 · PARTE 2', shots, durations};
+export const ep04: Episode = {id: 'ep04', tag: 'E SE #4 · PARTE 2', shots, durations, lines};

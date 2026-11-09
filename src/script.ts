@@ -42,6 +42,7 @@ export type Shot = {
   hud?: Hud;
   poll?: Poll; // enquete no topo (2 a 4 opções)
   comment?: Comment; // card de comentário de seguidor
+  tone?: 'suspense' | 'normal'; // suspense: narrador mais lento/grave, música abaixa e entra tensão
   cover?: boolean; // 1º plano: quadro 0 já legível (capa do Reels) — sem flash e sem animação de entrada
   ask?: {text: string; at?: number}; // figurinha de pergunta/pedido no meio do vídeo (comentário/envio)
   titleBar?: TitleLine[]; // faixa escura no topo com a premissa (como no vídeo de referência)
@@ -68,9 +69,20 @@ export type Tok = {w: string; c: 'white' | 'yellow' | 'red'};
 export const parseTokens = (text: string): Tok[] => {
   const out: Tok[] = [];
   let mode: Tok['c'] = 'white';
-  for (const raw of text.split(/\s+/).filter(Boolean)) {
+  let speaker: Tok['c'] | null = null; // fala de personagem {quem:texto}
+  for (let raw of text.split(/\s+/).filter(Boolean)) {
+    const sp = raw.match(/^\{(\w+):/);
+    if (sp) {
+      speaker = sp[1] === 'redjohn' ? 'red' : 'yellow';
+      raw = raw.slice(sp[0].length);
+    }
+    let closes = false;
+    if (speaker && raw.endsWith('}')) {
+      closes = true;
+      raw = raw.slice(0, -1);
+    }
     let word = '';
-    let wordMode: Tok['c'] = mode;
+    let wordMode: Tok['c'] = speaker ?? mode;
     for (const ch of raw) {
       if (ch === '*') {
         mode = mode === 'yellow' ? 'white' : 'yellow';
@@ -81,6 +93,7 @@ export const parseTokens = (text: string): Tok[] => {
       } else word += ch;
     }
     out.push({w: word, c: wordMode});
+    if (closes) speaker = null;
   }
   return out;
 };
@@ -90,6 +103,7 @@ export type Episode = {
   tag: string; // "E SE #1"
   shots: Shot[];
   durations: Record<string, number>; // segundos de narração por shot (gerado por tools/gerar-voz.py)
+  lines?: Record<string, number[]>; // início (s) de cada fala de personagem no shot
 };
 
 /** Duração do plano: segue a voz (quando existe) + respiro de 0,4s; senão estima pelo nº de palavras. */

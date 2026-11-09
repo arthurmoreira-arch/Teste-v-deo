@@ -204,13 +204,14 @@ const TitleBar = ({lines, instant}: {lines: TitleLine[]; instant?: boolean}) => 
 };
 
 /** Balões de pensamento ("ouvir a mente" dos personagens). */
-const Thoughts = ({items}: {items: Thought[]}) => {
+const Thoughts = ({items, starts}: {items: Thought[]; starts?: number[]}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   return (
     <>
       {items.map((th, i) => {
-        const k = spring({frame: frame - (th.at ?? 6 + i * 5), fps, config: {damping: 10, stiffness: 170}});
+        const at = th.at ?? (starts?.[i] !== undefined ? Math.round(starts[i] * fps) : 6 + i * 5);
+        const k = spring({frame: frame - at, fps, config: {damping: 10, stiffness: 170}});
         const bob = Math.sin((frame + i * 13) / 9) * 6;
         return (
           <div key={i} style={{position: 'absolute', left: `${th.x}%`, top: th.y + bob, transform: `translateX(-50%) scale(${Math.max(0, k)})`, transformOrigin: 'bottom center'}}>
@@ -224,6 +225,11 @@ const Thoughts = ({items}: {items: Thought[]}) => {
       })}
     </>
   );
+};
+
+const ThoughtsFor = ({shot}: {shot: Shot}) => {
+  const {ep} = useEp();
+  return <Thoughts items={shot.thoughts!} starts={ep.lines?.[shot.id]} />;
 };
 
 /** Figurinha de pergunta no meio do vídeo (puxa comentário/envio antes do final). */
@@ -247,7 +253,7 @@ export const Overlay = ({shot}: {shot: Shot}) => (
     {shot.banner && <Banner text={shot.banner} />}
     {shot.titleBar && <TitleBar lines={shot.titleBar} instant={shot.cover} />}
     {shot.ask && <Ask text={shot.ask.text} at={shot.ask.at} />}
-    {shot.thoughts && <Thoughts items={shot.thoughts} />}
+    {shot.thoughts && <ThoughtsFor shot={shot} />}
     <Hud shot={shot} />
     {shot.comment && <CommentCard c={shot.comment} instant={!shot.banner} />}
     {shot.poll ? <Poll poll={shot.poll} instant={shot.cta} /> : <Caption shot={shot} />}

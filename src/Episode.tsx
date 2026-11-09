@@ -23,11 +23,14 @@ const Progress = () => {
 
 const Body = () => {
   const {ep, frames, starts} = useEp();
+  // música abaixa nos planos de suspense
+  const tense = (f: number) => ep.shots.some((s, i) => s.tone === 'suspense' && f >= starts[i] && f < starts[i] + frames(s));
   return (
   <AbsoluteFill style={{backgroundColor: '#050507'}}>
     <World3D />
     {ep.shots.map((s, i) => (
       <Sequence key={s.id} from={starts[i]} durationInFrames={frames(s)}>
+        {s.tone === 'suspense' && <Audio src={staticFile('audio/tension.mp3')} volume={0.55} />}
         {!s.cover && <Flash hit={s.sfx === 'hit'} />}
         <Overlay shot={s} />
         <Audio src={staticFile(s.sfx === 'hit' ? 'audio/hit.mp3' : 'audio/whoosh.mp3')} volume={s.sfx === 'hit' ? 0.7 : 0.22} />
@@ -36,7 +39,7 @@ const Body = () => {
     ))}
     <Progress />
     <AbsoluteFill style={{background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.5) 100%)', pointerEvents: 'none'}} />
-    {HAS_MUSIC && <Audio src={staticFile('audio/music.mp3')} volume={(f) => Math.min(0.26, f / 45 * 0.26)} />}
+    {HAS_MUSIC && <Audio src={staticFile('audio/music.mp3')} volume={(f) => Math.min(tense(f) ? 0.1 : 0.26, f / 45 * 0.26)} />}
   </AbsoluteFill>
   );
 };

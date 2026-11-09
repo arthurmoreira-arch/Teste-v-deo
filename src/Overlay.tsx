@@ -61,7 +61,7 @@ const Caption = ({shot}: {shot: Shot}) => {
     acc += len;
   }
   const {fps} = useVideoConfig();
-  const s = spring({frame: frame - 4 - pageStart, fps, config: {damping: 14, stiffness: 220}, durationInFrames: 10});
+  const s = spring({frame: frame - 4 - pageStart + (shot.cover && page === 0 ? 12 : 0), fps, config: {damping: 14, stiffness: 220}, durationInFrames: 10});
   return (
     <div style={{position: 'absolute', left: 40, right: 40, top: 1180, textAlign: 'center', fontFamily: 'OswaldX', fontWeight: 700, fontSize: 104, lineHeight: 1.05, textTransform: 'uppercase', transform: `scale(${0.82 + 0.18 * s})`, opacity: Math.min(1, s * 1.6)}}>
       {pages[page].map((t, i) => (
@@ -81,7 +81,7 @@ const Hud = ({shot}: {shot: Shot}) => {
   const {label, from, to, prefix = '', suffix = ''} = shot.hud;
   const v = Math.round(interpolate(frame, [0, dur * 0.8], [from, to], {extrapolateRight: 'clamp'}));
   const txt = prefix + v.toLocaleString('pt-BR') + suffix;
-  const pop = interpolate(frame, [0, 8], [0, 1], {extrapolateRight: 'clamp'});
+  const pop = shot.cover ? 1 : interpolate(frame, [0, 8], [0, 1], {extrapolateRight: 'clamp'});
   return (
     <div style={{position: 'absolute', left: 36, top, opacity: pop, transform: `translateY(${(1 - pop) * 20}px)`}}>
       <div style={{fontFamily: 'OswaldX', fontWeight: 600, fontSize: 32, letterSpacing: 4, color: 'rgba(255,255,255,0.8)', textShadow: '0 2px 0 #000'}}>{label}</div>
@@ -186,13 +186,13 @@ const Banner = ({text}: {text: string}) => {
 };
 
 /** Faixa escura no topo com a premissa em 3 linhas coloridas (igual ao vídeo viral de referência). */
-const TitleBar = ({lines}: {lines: TitleLine[]}) => {
+const TitleBar = ({lines, instant}: {lines: TitleLine[]; instant?: boolean}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   return (
     <div style={{position: 'absolute', left: 0, right: 0, top: 0, paddingTop: 150, paddingBottom: 26, background: 'linear-gradient(#0d0f1a 82%, rgba(13,15,26,0))', textAlign: 'center'}}>
       {lines.map((l, i) => {
-        const k = spring({frame: frame - i * 6, fps, config: {damping: 11, stiffness: 190}});
+        const k = instant ? 1 : spring({frame: frame - i * 6, fps, config: {damping: 11, stiffness: 190}});
         return (
           <div key={i} style={{fontFamily: 'OswaldX', fontWeight: 700, fontSize: 108, lineHeight: 1.0, textTransform: 'uppercase', color: COLORS[l.c ?? 'white'], WebkitTextStroke: '10px #000', paintOrder: 'stroke fill', textShadow: '0 6px 0 #000', transform: `scale(${k})`}}>
             {l.t}
@@ -226,11 +226,27 @@ const Thoughts = ({items}: {items: Thought[]}) => {
   );
 };
 
+/** Figurinha de pergunta no meio do vídeo (puxa comentário/envio antes do final). */
+const Ask = ({text, at = 8}: {text: string; at?: number}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const k = spring({frame: frame - at, fps, config: {damping: 9, stiffness: 200}});
+  const pulse = 1 + Math.sin(frame / 4) * 0.025;
+  return (
+    <div style={{position: 'absolute', left: 0, right: 0, top: 300, display: 'flex', justifyContent: 'center'}}>
+      <div style={{background: '#f7c61a', color: '#16120a', fontFamily: 'OswaldX', fontWeight: 700, fontSize: 66, textTransform: 'uppercase', textAlign: 'center', lineHeight: 1.08, padding: '22px 40px', borderRadius: 30, border: '7px solid #000', maxWidth: 900, transform: `rotate(-3deg) scale(${Math.max(0, k) * pulse})`, boxShadow: '0 12px 0 rgba(0,0,0,.45)'}}>
+        {text}
+      </div>
+    </div>
+  );
+};
+
 export const Overlay = ({shot}: {shot: Shot}) => (
   <>
     <Tag />
     {shot.banner && <Banner text={shot.banner} />}
-    {shot.titleBar && <TitleBar lines={shot.titleBar} />}
+    {shot.titleBar && <TitleBar lines={shot.titleBar} instant={shot.cover} />}
+    {shot.ask && <Ask text={shot.ask.text} at={shot.ask.at} />}
     {shot.thoughts && <Thoughts items={shot.thoughts} />}
     <Hud shot={shot} />
     {shot.comment && <CommentCard c={shot.comment} instant={!shot.banner} />}

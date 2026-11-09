@@ -28,7 +28,7 @@ const Body = () => {
     <World3D />
     {ep.shots.map((s, i) => (
       <Sequence key={s.id} from={starts[i]} durationInFrames={frames(s)}>
-        <Flash hit={s.sfx === 'hit'} />
+        {!s.cover && <Flash hit={s.sfx === 'hit'} />}
         <Overlay shot={s} />
         <Audio src={staticFile(s.sfx === 'hit' ? 'audio/hit.mp3' : 'audio/whoosh.mp3')} volume={s.sfx === 'hit' ? 0.7 : 0.22} />
         {HAS_NARRATION && <Audio src={staticFile(`audio/${ep.id}/shots/${String(i).padStart(2, '0')}.mp3`)} volume={1} />}

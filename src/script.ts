@@ -42,6 +42,8 @@ export type Shot = {
   hud?: Hud;
   poll?: Poll; // enquete no topo (2 a 4 opções)
   comment?: Comment; // card de comentário de seguidor
+  cover?: boolean; // 1º plano: quadro 0 já legível (capa do Reels) — sem flash e sem animação de entrada
+  ask?: {text: string; at?: number}; // figurinha de pergunta/pedido no meio do vídeo (comentário/envio)
   titleBar?: TitleLine[]; // faixa escura no topo com a premissa (como no vídeo de referência)
   thoughts?: Thought[]; // balões de pensamento na tela
   banner?: string; // título de gancho no topo (primeiros 2s)

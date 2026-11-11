@@ -103,6 +103,7 @@ export type Episode = {
   tag: string; // "E SE #1"
   shots: Shot[];
   durations: Record<string, number>; // segundos de narração por shot (gerado por tools/gerar-voz.py)
+  narrator?: Who; // quem narra (padrão: narrador). Ex.: 'voce' para o boneco falar direto com a galera
   lines?: Record<string, number[]>; // início (s) de cada fala de personagem no shot
 };
 

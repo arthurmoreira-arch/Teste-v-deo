@@ -92,6 +92,11 @@ def to_phonemes(text: str) -> str:
         out.append(tok.phonemize(text[pos:], "pt-br"))
     return re.sub(r"\s+([.,?!:;])", r"\1", " ".join(out))
 
+# episódio pode trocar quem narra:  narrator: 'voce'  (ex.: story em que o próprio boneco fala)
+_nm = re.search(r"narrator: '(\w+)'", src)
+if _nm and _nm.group(1) in VOICES:
+    VOICES["narrador"] = VOICES[_nm.group(1)]
+
 blocks = re.split(r"\n  \{\n    id: ", src)[1:]
 tones = {}
 for b in blocks:

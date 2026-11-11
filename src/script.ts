@@ -106,11 +106,11 @@ export type Episode = {
   lines?: Record<string, number[]>; // início (s) de cada fala de personagem no shot
 };
 
-/** Duração do plano: segue a voz (quando existe) + respiro de 0,4s; senão estima pelo nº de palavras. */
+/** Duração do plano: segue a voz (quando existe) + respiro de 0,3s; senão estima pelo nº de palavras. */
 export const timing = (ep: Episode) => {
   const frames = (s: Shot) => {
     const d = ep.durations[s.id];
-    return d ? Math.round((d + 0.4) * FPS) : Math.max(45, Math.round((wordsOf(s.text).length / WORDS_PER_SECOND + 0.5) * FPS));
+    return d ? Math.round((d + 0.3) * FPS) : Math.max(45, Math.round((wordsOf(s.text).length / WORDS_PER_SECOND + 0.5) * FPS));
   };
   const starts: number[] = [];
   ep.shots.forEach((s, i) => starts.push(i === 0 ? 0 : starts[i - 1] + frames(ep.shots[i - 1])));

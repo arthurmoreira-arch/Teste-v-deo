@@ -27,7 +27,10 @@ const Body = () => {
   const tense = (f: number) => ep.shots.some((s, i) => s.tone === 'suspense' && f >= starts[i] && f < starts[i] + frames(s));
   return (
   <AbsoluteFill style={{backgroundColor: '#050507'}}>
-    <World3D />
+    {/* correção de cor: mais contraste e saturação, look mais "finalizado" */}
+    <AbsoluteFill style={{filter: 'contrast(1.1) saturate(1.2) brightness(1.03)'}}>
+      <World3D />
+    </AbsoluteFill>
     {ep.shots.map((s, i) => (
       <Sequence key={s.id} from={starts[i]} durationInFrames={frames(s)}>
         {s.tone === 'suspense' && <Audio src={staticFile('audio/tension.mp3')} volume={0.55} />}

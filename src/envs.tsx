@@ -257,6 +257,10 @@ export const House = ({t, windowSmiley, doorSmiley, tape, warm}: HouseProps) => 
       {windowSmiley && <pointLight position={[-1.6, 2.4, 5.5]} color="#ff1a1a" intensity={9 * flick} distance={9} />}
       {warm && !windowSmiley && <Box p={[-1.6, 2.4, 2.57]} s={[1.3, 1.3, 0.04]} c="#ffcf7a" e="#ffb54a" ei={1.4} />}
       {warm && <pointLight position={[-1.6, 2.4, 4]} color="#ffb54a" intensity={6} distance={8} />}
+      {/* luz de varanda: ilumina quem está na frente da porta */}
+      {warm && <pointLight position={[1.6, 3.4, 5.2]} color="#ffe2b0" intensity={55} distance={16} />}
+      {warm && <pointLight position={[3.5, 2.2, 9.5]} color="#8fa8ff" intensity={30} distance={14} />}
+      {warm && <mesh position={[1.6, 3.3, 2.7]}><sphereGeometry args={[0.14, 10, 8]} /><meshBasicMaterial color="#fff1c8" /></mesh>}
       {doorSmiley && (
         <group position={[1.6, 1.5, 2.58]}>
           <DrawnSmiley r={0.38} flick={0.9} />

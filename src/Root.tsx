@@ -5,6 +5,7 @@ import {ep01} from './episodes/ep01';
 import {ep02} from './episodes/ep02';
 import {ep03} from './episodes/ep03';
 import {ep04} from './episodes/ep04';
+import {ep05} from './episodes/ep05';
 
 const comp = (id: string, ep: Ep) => (
   <Composition key={id} id={id} component={() => <Episode ep={ep} />} durationInFrames={timing(ep).total} fps={FPS} width={WIDTH} height={HEIGHT} />
@@ -16,5 +17,6 @@ export const Root = () => (
     {comp('EseMentalista2', ep02)}
     {comp('EseMentalista3', ep03)}
     {comp('EseMentalista4', ep04)}
+    {comp('EseMentalista5', ep05)}
   </>
 );

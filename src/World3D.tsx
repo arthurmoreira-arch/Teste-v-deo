@@ -25,7 +25,10 @@ const Rig = ({shot, k, local}: {shot: Shot; k: number; local: number}) => {
     // tremida nos planos de impacto + "zoom punch" no início de todo corte
     const hit = shot.sfx === 'hit' && local < 14 ? Math.exp(-local / 4) : 0;
     const sh = hit * 0.09;
-    camera.position.set(p[0] + Math.sin(local * 5.1) * sh, p[1] + Math.cos(local * 6.3) * sh, p[2]);
+    // câmera "na mão": micro-movimento constante dá vida ao plano
+    const hx = Math.sin(local * 0.21) * 0.012 + Math.sin(local * 0.37) * 0.006;
+    const hy = Math.cos(local * 0.17) * 0.01;
+    camera.position.set(p[0] + hx + Math.sin(local * 5.1) * sh, p[1] + hy + Math.cos(local * 6.3) * sh, p[2]);
     camera.lookAt(...l);
     const punch = local < 9 ? (1 - local / 9) * 7 : 0;
     (camera as THREE.PerspectiveCamera).fov = (shot.fov ?? 55) - punch;

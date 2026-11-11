@@ -49,7 +49,7 @@ def fix(t: str) -> str:
 # Shot com  tone: 'suspense'  → narrador mais lento, mais grave e com eco de ambiente.
 VOICES = {
     # nome:      (modelo, length_scale, pitch, filtros extras)
-    "narrador": ("pt_BR-faber-medium", 1.0, 1.0, ""),
+    "narrador": ("pt_BR-faber-medium", 0.92, 1.0, ""),
     "voce": ("pt_BR-cadu-medium", 0.98, 1.0, ""),
     "mae": ("pt_BR-cadu-medium", 1.0, 1.32, ""),
     "chefe": ("pt_BR-jeff-medium", 1.0, 0.95, ""),
@@ -57,7 +57,7 @@ VOICES = {
     "redjohn": ("pt_BR-jeff-medium", 1.18, 0.8, ",lowpass=f=5200,aecho=0.8:0.85:90|180:0.35|0.2"),
 }
 THOUGHT_FX = ",aecho=0.8:0.6:45:0.25"  # falas de personagem soam "dentro da cabeça"
-SUSPENSE = (1.12, 0.94, ",aecho=0.8:0.7:70:0.22")  # narrador em tom de suspense
+SUSPENSE = (1.03, 0.95, ",aecho=0.8:0.7:70:0.22")  # narrador em tom de suspense
 CLEAN = "highpass=f=70,equalizer=f=150:t=q:w=1:g=2,equalizer=f=3500:t=q:w=1.2:g=2.5,acompressor=threshold=-21dB:ratio=3:attack=4:release=90"
 GAP = 0.22  # silêncio entre narrador e fala
 

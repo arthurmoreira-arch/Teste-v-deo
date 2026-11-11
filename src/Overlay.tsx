@@ -62,8 +62,9 @@ const Caption = ({shot}: {shot: Shot}) => {
   }
   const {fps} = useVideoConfig();
   const s = spring({frame: frame - 4 - pageStart + (shot.cover && page === 0 ? 12 : 0), fps, config: {damping: 14, stiffness: 220}, durationInFrames: 10});
+  const pageLen = pages[page].map((t) => t.w).join(' ').length; // páginas longas encolhem para não cortar na borda
   return (
-    <div style={{position: 'absolute', left: 40, right: 40, top: 1180, textAlign: 'center', fontFamily: 'OswaldX', fontWeight: 700, fontSize: 104, lineHeight: 1.05, textTransform: 'uppercase', transform: `scale(${0.82 + 0.18 * s})`, opacity: Math.min(1, s * 1.6)}}>
+    <div style={{position: 'absolute', left: 40, right: 40, top: 1180, textAlign: 'center', fontFamily: 'OswaldX', fontWeight: 700, fontSize: pageLen > 19 ? 84 : pageLen > 16 ? 94 : 104, lineHeight: 1.05, textTransform: 'uppercase', transform: `scale(${0.82 + 0.18 * s})`, opacity: Math.min(1, s * 1.6)}}>
       {pages[page].map((t, i) => (
         <span key={i} style={{color: COLORS[t.c], marginRight: 22, WebkitTextStroke: '10px #000', paintOrder: 'stroke fill', textShadow: '0 5px 0 #000'}}>
           {t.w}

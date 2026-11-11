@@ -17,7 +17,7 @@ const MOODS = {
 
 const lerp3 = (a: V3, b: V3, k: number): V3 => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
 
-const Rig = ({shot, k, local}: {shot: Shot; k: number; local: number}) => {
+const Rig = ({shot, k, local, dur}: {shot: Shot; k: number; local: number; dur: number}) => {
   const {camera} = useThree();
   useLayoutEffect(() => {
     const p = lerp3(shot.cam[0].p, shot.cam[1].p, k);
@@ -31,7 +31,11 @@ const Rig = ({shot, k, local}: {shot: Shot; k: number; local: number}) => {
     camera.position.set(p[0] + hx + Math.sin(local * 5.1) * sh, p[1] + hy + Math.cos(local * 6.3) * sh, p[2]);
     camera.lookAt(...l);
     const punch = local < 9 ? (1 - local / 9) * 7 : 0;
-    (camera as THREE.PerspectiveCamera).fov = (shot.fov ?? 55) - punch;
+    // corte interno: em planos longos a câmera "pula" para mais perto na metade (mais ritmo, sem mudar a cena)
+    const half = Math.round(dur * 0.52);
+    const cutIn = dur > 80 && !shot.poll && local >= half;
+    const cutPunch = cutIn && local - half < 7 ? (1 - (local - half) / 7) * 5 : 0;
+    (camera as THREE.PerspectiveCamera).fov = (shot.fov ?? 55) - punch - (cutIn ? 11 : 0) - cutPunch;
     camera.updateProjectionMatrix();
   });
   return null;
@@ -59,7 +63,7 @@ export const World3D = () => {
     <ThreeCanvas width={width} height={height} shadows camera={{position: [0, 2, 6], fov: 55, near: 0.1, far: 220}} gl={{antialias: true}}>
       <color attach="background" args={[sky]} />
       <fog attach="fog" args={[sky, shot.env === 'city' ? 70 : 30, shot.env === 'city' ? 140 : 80]} />
-      <Rig shot={shot} k={k} local={local} />
+      <Rig shot={shot} k={k} local={local} dur={dur} />
       <ambientLight color={night > 0.5 ? '#3a4a8a' : m.amb} intensity={ambI} />
       <directionalLight
         color={night > 0.5 ? '#6f86d8' : m.dir}

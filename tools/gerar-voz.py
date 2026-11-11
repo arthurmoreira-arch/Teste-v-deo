@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Gera a narração (voz de IA pt-BR, Piper) de cada plano e as durações em public/audio/durations.json.
-Uso: python3 tools/gerar-voz.py ep02   (precisa: pip install piper-tts, ffmpeg)
+"""Gera a narração (voz de IA pt-BR, Kokoro) de cada plano e as durações em public/audio/durations.json.
+Uso: python3 tools/gerar-voz.py ep02   (precisa: pip install kokoro-onnx soundfile, ffmpeg e os modelos em tools/kokoro/)
 """
 import json, re, subprocess, sys, pathlib
 
@@ -44,22 +44,53 @@ def fix(t: str) -> str:
         t = rx.sub(rep, t)
     return re.sub(r"\s+", " ", t).strip()
 
-# ---------------------------------------------------------------- elenco de vozes
+# ---------------------------------------------------------------- elenco de vozes (Kokoro, 24 kHz)
 # Falas de personagem no texto do shot:  {mae:Ele tá estranho hoje.}   {redjohn:Achei você.}
-# Shot com  tone: 'suspense'  → narrador mais lento, mais grave e com eco de ambiente.
+# Shot com  tone: 'suspense'  → narrador um pouco mais grave e com eco de ambiente.
+import soundfile as sf
+from kokoro_onnx import Kokoro
+from kokoro_onnx.tokenizer import Tokenizer
+
+KDIR = root / "tools" / "kokoro"
+kokoro = Kokoro(str(KDIR / "kokoro-v1.0.onnx"), str(KDIR / "voices-v1.0.bin"))
+tok = Tokenizer()
+
 VOICES = {
-    # nome:      (modelo, length_scale, pitch, filtros extras)
-    "narrador": ("pt_BR-faber-medium", 0.92, 1.0, ""),
-    "voce": ("pt_BR-cadu-medium", 0.98, 1.0, ""),
-    "mae": ("pt_BR-cadu-medium", 1.0, 1.32, ""),
-    "chefe": ("pt_BR-jeff-medium", 1.0, 0.95, ""),
-    "jane": ("pt_BR-jeff-medium", 0.97, 1.05, ""),
-    "redjohn": ("pt_BR-jeff-medium", 1.18, 0.8, ",lowpass=f=5200,aecho=0.8:0.85:90|180:0.35|0.2"),
+    # nome:      (voz Kokoro, velocidade, pitch, filtros extras)
+    "narrador": ("pm_alex", 1.1, 1.0, ""),
+    "voce": ("pm_santa", 1.05, 1.03, ""),
+    "mae": ("pf_dora", 1.0, 1.0, ""),
+    "chefe": ("pm_santa", 1.0, 0.93, ""),
+    "jane": ("pm_santa", 1.05, 1.0, ""),
+    "redjohn": ("pm_alex", 0.86, 0.78, ",lowpass=f=5200,aecho=0.8:0.85:90|180:0.35|0.2"),
 }
 THOUGHT_FX = ",aecho=0.8:0.6:45:0.25"  # falas de personagem soam "dentro da cabeça"
-SUSPENSE = (1.03, 0.95, ",aecho=0.8:0.7:70:0.22")  # narrador em tom de suspense
-CLEAN = "highpass=f=70,equalizer=f=150:t=q:w=1:g=2,equalizer=f=3500:t=q:w=1.2:g=2.5,acompressor=threshold=-21dB:ratio=3:attack=4:release=90"
-GAP = 0.22  # silêncio entre narrador e fala
+SUSPENSE = (0.97, 0.96, ",aecho=0.8:0.7:70:0.2")  # narrador em tom de suspense (x velocidade, x pitch, fx)
+CLEAN = "highpass=f=70,equalizer=f=160:t=q:w=1:g=1.5,equalizer=f=3800:t=q:w=1.2:g=2,acompressor=threshold=-21dB:ratio=3:attack=4:release=90"
+GAP = 0.18  # silêncio entre narrador e fala
+
+KSMALL = {"o": "ʊ", "a": "a", "e": "i", "de": "dʒy", "do": "dʊ", "da": "da", "nem": "nˈeɪŋ", "em": "eɪŋ", "com": "kõŋ", "se": "sy", "que": "ky"}
+_names = re.compile("|".join(f"(?P<n{k}>(?<![\\w@]){pat}(?!\\w))" for k, (pat, _) in enumerate(NAMES)))
+
+def to_phonemes(text: str) -> str:
+    """Texto -> fonemas pt-BR; nomes da série entram com a pronúncia definida em NAMES."""
+    text = re.sub(r"[*!]", "", text)
+    out, pos = [], 0
+    for m in _names.finditer(text):
+        before = text[pos:m.start()]
+        # artigos/preposições colados no nome: fonema átono (senão viram "Ó Jane", "Á Lisbon")
+        sm = re.search(rf"((?:\b(?i:{_small})\s+)+)$", before)
+        pre = ""
+        if sm:
+            before = before[:sm.start()]
+            pre = " ".join(KSMALL[w.lower()] for w in sm.group(1).split()) + " "
+        if before.strip():
+            out.append(tok.phonemize(before, "pt-br"))
+        out.append(pre + NAMES[int(m.lastgroup[1:])][1])
+        pos = m.end()
+    if text[pos:].strip():
+        out.append(tok.phonemize(text[pos:], "pt-br"))
+    return re.sub(r"\s+([.,?!:;])", r"\1", " ".join(out))
 
 blocks = re.split(r"\n  \{\n    id: ", src)[1:]
 tones = {}
@@ -71,20 +102,18 @@ def dur(f):
     return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(f)]).decode())
 
 def synth(text, speaker, suspense, dst):
-    model, ls, pitch, extra = VOICES.get(speaker, VOICES["narrador"])
+    voice, speed, pitch, extra = VOICES.get(speaker, VOICES["narrador"])
     fx = extra
     if speaker == "narrador" and suspense:
-        ls, pitch, fx = ls * SUSPENSE[0], pitch * SUSPENSE[1], SUSPENSE[2]
+        speed, pitch, fx = speed * SUSPENSE[0], pitch * SUSPENSE[1], SUSPENSE[2]
     elif speaker != "narrador":
         fx += THOUGHT_FX
     raw = dst.with_suffix(".raw.wav")
-    subprocess.run(
-        [sys.executable, "-m", "piper", "-m", str(root / "tools" / f"{model}.onnx"), "-f", str(raw),
-         "--length-scale", str(ls), "--noise-scale", "0.7", "--noise-w", "0.85", "--sentence-silence", "0.35"],
-        input=fix(text).encode("utf-8"), check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-    )
+    audio, sr = kokoro.create(to_phonemes(text), voice=voice, speed=speed, is_phonemes=True)
+    sf.write(str(raw), audio, sr)
     pf = f"rubberband=pitch={pitch}," if abs(pitch - 1) > 1e-3 else ""
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(raw), "-af", f"aresample=44100,{pf}{CLEAN}{fx}", "-ac", "1", str(dst)], check=True)
+    trim = "silenceremove=start_periods=1:start_threshold=-45dB,areverse,silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(raw), "-af", f"{trim}aresample=44100,{pf}{CLEAN}{fx}", "-ac", "1", str(dst)], check=True)
     raw.unlink()
 
 durations, lines = {}, {}

@@ -9,3 +9,9 @@ Narrador = Faber · Você = Cadu · Mãe = Cadu (+tom agudo) · Chefe/Jane = Jef
 Falas no texto do shot: `{mae:Ele tá estranho hoje.}` — viram outra voz, com eco de "pensamento", e a legenda fica amarela (vermelha no Red John).
 `tone: 'suspense'` no shot: narrador mais lento e grave, música abaixa e entra o drone de tensão.
 Modelos: baixe `vits-piper-pt_BR-{faber,cadu,jeff}-medium.tar.bz2` em github.com/k2-fsa/sherpa-onnx/releases (tag tts-models) e copie o `.onnx` e `.onnx.json` para `tools/`.
+
+## Voz atual: Kokoro (mais natural que o Piper)
+`pip install kokoro-onnx soundfile` e baixe `kokoro-v1.0.onnx` + `voices-v1.0.bin` de
+github.com/thewh1teagle/kokoro-onnx/releases (tag model-files-v1.0) para `tools/kokoro/`.
+Vozes pt-BR: `pm_alex` (narrador / Red John grave), `pm_santa` (você, chefe, Jane), `pf_dora` (mãe — feminina).
+Troque o elenco em `VOICES` dentro de `tools/gerar-voz.py`.

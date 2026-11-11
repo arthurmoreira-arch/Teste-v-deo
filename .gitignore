@@ -1,5 +1,6 @@
 tools/*.onnx
+tools/kokoro/
 out
 node_modules
 *.mp4
-public/audio/shots/*_raw.wav
+public/audio/*/shots/*.wav

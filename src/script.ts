@@ -47,6 +47,7 @@ export type Shot = {
   ask?: {text: string; at?: number}; // figurinha de pergunta/pedido no meio do vídeo (comentário/envio)
   titleBar?: TitleLine[]; // faixa escura no topo com a premissa (como no vídeo de referência)
   thoughts?: Thought[]; // balões de pensamento na tela
+  timers?: Thought[]; // etiquetas de "tempo de vida" flutuando sobre as cabeças
   banner?: string; // título de gancho no topo (primeiros 2s)
   sfx?: 'hit' | 'whoosh'; // efeito sonoro no início do plano
   cta?: boolean; // chamada final: curtir, seguir, votar

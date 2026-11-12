@@ -228,6 +228,30 @@ const Thoughts = ({items, starts}: {items: Thought[]; starts?: number[]}) => {
   );
 };
 
+/** Etiquetas de contagem (ex.: tempo de vida) flutuando sobre as cabeças. */
+const Timers = ({items}: {items: Thought[]}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  return (
+    <>
+      {items.map((t, i) => {
+        const k = t.at === 0 ? 1 : spring({frame: frame - (t.at ?? 3 + i * 4), fps, config: {damping: 11, stiffness: 190}});
+        const bob = Math.sin((frame + i * 17) / 10) * 5;
+        const blink = t.red ? 0.75 + 0.25 * Math.abs(Math.sin(frame / 5)) : 1;
+        const c = t.red ? '#ff2d2d' : '#7dffb0';
+        return (
+          <div key={i} style={{position: 'absolute', left: `${t.x}%`, top: t.y + bob, transform: `translateX(-50%) scale(${Math.max(0, k)})`, transformOrigin: 'bottom center', display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: blink}}>
+            <div style={{background: 'rgba(8,8,12,0.92)', color: c, border: `5px solid ${c}`, borderRadius: 18, padding: t.red ? '14px 30px' : '8px 20px', fontFamily: 'OswaldX', fontWeight: 700, fontSize: t.red ? 76 : 46, letterSpacing: 2, whiteSpace: 'nowrap', boxShadow: `0 0 ${t.red ? 44 : 18}px ${c}88`}}>
+              ⏳ {t.text}
+            </div>
+            <div style={{width: 0, height: 0, borderLeft: '14px solid transparent', borderRight: '14px solid transparent', borderTop: `18px solid ${c}`}} />
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
 const ThoughtsFor = ({shot}: {shot: Shot}) => {
   const {ep} = useEp();
   return <Thoughts items={shot.thoughts!} starts={ep.lines?.[shot.id]} />;
@@ -255,6 +279,7 @@ export const Overlay = ({shot}: {shot: Shot}) => (
     {shot.titleBar && <TitleBar lines={shot.titleBar} instant={shot.cover} />}
     {shot.ask && <Ask text={shot.ask.text} at={shot.ask.at} />}
     {shot.thoughts && <ThoughtsFor shot={shot} />}
+    {shot.timers && <Timers items={shot.timers} />}
     <Hud shot={shot} />
     {shot.comment && <CommentCard c={shot.comment} instant={!shot.banner} />}
     {shot.poll ? <Poll poll={shot.poll} instant={shot.cta} /> : <Caption shot={shot} />}

@@ -68,7 +68,7 @@ const Caption = ({shot}: {shot: Shot}) => {
   const s = spring({frame: frame - 4 - pageStart + (shot.cover && page === 0 ? 12 : 0), fps, config: {damping: 14, stiffness: 220}, durationInFrames: 10});
   const pageLen = pages[page].map((t) => t.w).join(' ').length; // páginas longas encolhem para não cortar na borda
   return (
-    <div style={{position: 'absolute', left: 40, right: 40, top: 1180, textAlign: 'center', fontFamily: 'OswaldX', fontWeight: 700, fontSize: pageLen > 19 ? 84 : pageLen > 16 ? 94 : 104, lineHeight: 1.05, textTransform: 'uppercase', transform: `scale(${0.82 + 0.18 * s})`, opacity: Math.min(1, s * 1.6)}}>
+    <div style={{position: 'absolute', left: 40, right: 40, top: shot.chat ? (shot.titleBar ? 1035 : 905) : 1180, textAlign: 'center', fontFamily: 'OswaldX', fontWeight: 700, fontSize: pageLen > 19 ? 84 : pageLen > 16 ? 94 : 104, lineHeight: 1.05, textTransform: 'uppercase', transform: `scale(${0.82 + 0.18 * s})`, opacity: Math.min(1, s * 1.6)}}>
       {pages[page].map((t, i) => (
         <span key={i} style={{color: COLORS[t.c], marginRight: 22, WebkitTextStroke: '10px #000', paintOrder: 'stroke fill', textShadow: inkShadow(), display: 'inline-block', transform: STYLE.verse ? `rotate(${i % 2 ? 1.5 : -1.5}deg)` : undefined}}>
           {t.w}
@@ -249,7 +249,7 @@ const ChatPhone = ({chat, hasTitle, cover}: {chat: Chat; hasTitle: boolean; cove
               <div style={{fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 26, color: '#3ddc84'}}>online</div>
             </div>
           </div>
-          <div style={{padding: '26px 26px 30px', display: 'flex', flexDirection: 'column', gap: 18, minHeight: hasTitle ? 330 : 520, background: 'radial-gradient(circle, rgba(255,255,255,0.06) 2px, transparent 2.6px) 0 0 / 16px 16px, #11141f'}}>
+          <div style={{padding: '26px 26px 30px', display: 'flex', flexDirection: 'column', gap: 18, minHeight: hasTitle ? 330 : 440, background: 'radial-gradient(circle, rgba(255,255,255,0.06) 2px, transparent 2.6px) 0 0 / 16px 16px, #11141f'}}>
             {chat.msgs.map((m, i) => {
               const appear = cover ? 1 : spring({frame: frame - 3 - i * 4, fps, config: {damping: 14, stiffness: 200}});
               const at = m.at ?? 9999;

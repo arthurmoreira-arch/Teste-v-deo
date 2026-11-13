@@ -15,3 +15,13 @@ Modelos: baixe `vits-piper-pt_BR-{faber,cadu,jeff}-medium.tar.bz2` em github.com
 github.com/thewh1teagle/kokoro-onnx/releases (tag model-files-v1.0) para `tools/kokoro/`.
 Vozes pt-BR: `pm_alex` (narrador / Red John grave), `pm_santa` (você, chefe, Jane), `pf_dora` (mãe — feminina).
 Troque o elenco em `VOICES` dentro de `tools/gerar-voz.py`.
+
+## Episódios em quadrinhos (animação 2D, `src/comic/`)
+Estilo novo, desenhado do zero em vetor: contorno a tinta, sombra reticulada, luz de recorte rosa/ciano,
+fundo com cores separadas, painéis de HQ, onomatopeias e animação "em dois" (12 quadros por segundo).
+- `src/comic/kit.tsx` (ferramentas), `chars.tsx` (personagens), `sets.tsx` (cenários), `ui.tsx` (celular, legendas, enquete), `Ep08.tsx` (cenas).
+- Textos e tempos: `src/episodes/ep08.ts` (o mesmo formato dos outros episódios; `glitch: [...]` marca os quadros de falha).
+- Passo a passo:
+  1. `python3 tools/gerar-voz.py ep08` (voz) e `python3 tools/gerar-beat.py ep08` (batida cortada no ritmo das cenas)
+  2. `npx remotion render src/index.ts EseApagadasHQ out/ep8-raw.mp4 --crf=16`
+  3. `python3 tools/pos-hq.py ep08 out/ep8-raw.mp4 out/e-se-ep07-hq.mp4` (falhas de imagem + áudio normalizado)

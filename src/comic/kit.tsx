@@ -204,27 +204,19 @@ export const Canvas = ({children, style}: {children: React.ReactNode; style?: Re
 );
 
 // ---------------------------------------------------------------- letras
-type LetterProps = {children: React.ReactNode; size?: number; color?: string; stroke?: number; rot?: number; skew?: number; font?: string; style?: React.CSSProperties; shadow?: string | false};
-export const Letter = ({children, size = 120, color = C.white, stroke = 12, rot = 0, skew = -7, font = 'BangersX', style, shadow}: LetterProps) => (
-  <div
-    style={{
-      fontFamily: font,
-      fontSize: size,
-      lineHeight: 0.98,
-      color,
-      WebkitTextStroke: `${stroke}px ${INK}`,
-      paintOrder: 'stroke fill',
-      textShadow: shadow === false ? undefined : shadow ?? `${size * 0.06}px ${size * 0.055}px 0 ${C.magenta}, ${-size * 0.045}px ${-size * 0.035}px 0 ${C.cyan}, 0 ${size * 0.1}px 0 ${INK}`,
-      transform: `rotate(${rot}deg) skewX(${skew}deg)`,
-      letterSpacing: size * 0.02,
-      whiteSpace: 'nowrap',
-      textTransform: 'uppercase',
-      ...style,
-    }}
-  >
-    {children}
-  </div>
-);
+type LetterProps = {children: React.ReactNode; size?: number; color?: string; stroke?: number; rot?: number; skew?: number; font?: string; style?: React.CSSProperties; shadow?: string | false; halo?: string};
+/** Letra de HQ: preenchimento + contorno a tinta + sombra fora de registro (rosa/ciano).
+ *  Com `halo`, ganha um segundo contorno claro por fora da tinta — fica legível sobre qualquer fundo. */
+export const Letter = ({children, size = 120, color = C.white, stroke = 12, rot = 0, skew = -7, font = 'BangersX', style, shadow, halo}: LetterProps) => {
+  const sh = shadow === false ? undefined : shadow ?? `${size * 0.06}px ${size * 0.055}px 0 ${C.magenta}, ${-size * 0.045}px ${-size * 0.035}px 0 ${C.cyan}, 0 ${size * 0.1}px 0 ${INK}`;
+  const base: React.CSSProperties = {fontFamily: font, fontSize: size, lineHeight: 0.98, letterSpacing: size * 0.02, whiteSpace: 'nowrap', textTransform: 'uppercase', gridArea: '1 / 1'};
+  return (
+    <div style={{display: 'grid', transform: `rotate(${rot}deg) skewX(${skew}deg)`, ...style}}>
+      {halo && <div style={{...base, color: halo, WebkitTextStroke: `${stroke + size * 0.15}px ${halo}`, textShadow: sh}}>{children}</div>}
+      <div style={{...base, color, WebkitTextStroke: `${stroke}px ${INK}`, paintOrder: 'stroke fill', textShadow: halo ? undefined : sh}}>{children}</div>
+    </div>
+  );
+};
 
 /** Fundo "fora de foco" do jeito dos quadrinhos: em vez de borrar, separa as cores (vermelho/verde/azul deslocados). */
 export const Ghost = ({children, d = 7}: {children: React.ReactNode; d?: number}) => {

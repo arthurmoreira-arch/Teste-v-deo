@@ -182,7 +182,7 @@ export const Captions = ({text, f, dur, y, size = 104}: {text: string; f: number
     <div style={{position: 'absolute', left: 20, right: 20, top: y, display: 'flex', justifyContent: 'center'}}>
       <div style={{display: 'flex', gap: fs * 0.2, transform: `scale(${Math.max(0.01, k)}) rotate(-2deg)`}}>
         {pages[page].map((t, i) => (
-          <Letter key={i} size={fs} color={CAP[t.c]} stroke={fs * 0.12} rot={i % 2 ? 1.5 : -1.5}>
+          <Letter key={i} size={fs} color={CAP[t.c]} stroke={fs * 0.11} rot={i % 2 ? 1.5 : -1.5} halo={C.white}>
             {t.w}
           </Letter>
         ))}

@@ -1,7 +1,7 @@
 // Episódio 8 em quadrinhos: cada plano é uma "página" com painéis, personagens e letras.
 import React from 'react';
 import {AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
-import {C, Canvas, Ghost, H, INK, Krackle, Panel, SpeedLines, W, ease, mix, pop, rnd, twos} from './kit';
+import {C, Canvas, Ghost, INK, Krackle, Panel, SpeedLines, W, ease, mix, pop, twos} from './kit';
 import {BackBust, BiaSilhouette, Bust, Expr, LIGHTS} from './chars';
 import {Bedroom, CityNight, Facade, Office, PopBG} from './sets';
 import {Ask, CaptionBox, Captions, ChatCard, FloatBubble, PhoneList, Poll, Sfx, Tag, Thumb, TitleBlock} from './ui';
@@ -36,11 +36,11 @@ const S1 = ({f, dur, shot}: SP) => {
           <Bust uid="s1" look="voce" e={e} light={LIGHTS.night} f={f} />
         </g>
       </Canvas>
-      <TitleBlock f={f} y={126} instant lines={[{t: 'Você lê as', c: C.white}, {t: 'mensagens', c: C.yellow}, {t: 'apagadas.', c: '#ff4a5e'}]} />
-      {f2 < 32 && <FloatBubble f={f} x={330} y={640} />}
-      {f2 >= 30 && <ChatCard name="Lucas" y={492} f={f - 30} msgs={[{t: 'e aí, vai hoje?'}, {deleted: true, reveal: 'tomara que ele não vá kkk', at: 34}]} />}
-      <Sfx text="BZZT!" f={f} at={66} x={890} y={610} rot={9} size={92} />
-      <Captions text={shot.text} f={f} dur={dur} y={880} />
+      <TitleBlock f={f} y={112} size={108} instant lines={[{t: 'Você lê as', c: C.white}, {t: 'mensagens', c: C.yellow}, {t: 'apagadas.', c: '#ff4a5e'}]} />
+      {f2 < 32 && <FloatBubble f={f} x={330} y={610} />}
+      {f2 >= 30 && <ChatCard name="Lucas" y={506} f={f - 30} msgs={[{t: 'e aí, vai hoje?'}, {deleted: true, reveal: 'tomara que ele não vá kkk', at: 34}]} />}
+      <Sfx text="BZZT!" f={f} at={66} x={900} y={500} rot={9} size={88} />
+      <Captions text={shot.text} f={f} dur={dur} y={884} />
     </AbsoluteFill>
   );
 };
@@ -75,7 +75,7 @@ const S2 = ({f, dur, shot}: SP) => {
         </Canvas>
       </Panel>
       <ChatCard name="Chefe" y={640} f={f - 4} hue={C.orange} msgs={[{t: 'relatório recebido.'}, {deleted: true, reveal: 'esse aí merece um aumento', at: 40}]} />
-      <Sfx text="PLIM!" f={f} at={50} x={850} y={1196} rot={10} size={104} burst="#28c8ff" />
+      <Sfx text="PLIM!" f={f} at={50} x={896} y={632} rot={10} size={88} burst="#28c8ff" />
       <Captions text={shot.text} f={f} dur={dur} y={1022} />
     </AbsoluteFill>
   );
@@ -170,15 +170,15 @@ const S5 = ({f, dur, shot}: SP) => {
               <Bedroom f={f} mood={0.35} />
             </Ghost>
           </g>
-          <SpeedLines cx={540} cy={1010} n={40} r0={760} seed={2 + (f2 % 6)} color={C.cyan} opacity={0.22} />
-          <g transform={`translate(540,${1030 + Math.sin(f2 / 3) * 3}) scale(2.02)`}>
+          <SpeedLines cx={540} cy={930} n={40} r0={760} seed={2 + (f2 % 6)} color={C.cyan} opacity={0.22} />
+          <g transform={`translate(540,${946 + Math.sin(f2 / 3) * 3}) scale(2.02)`}>
             <Bust uid="s5" look="voce" e={e} light={LIGHTS.room} f={f} />
           </g>
         </g>
       </Canvas>
       <Ask f={f} at={6} y={150} text="Você leria? Comenta 👇" />
       <CaptionBox f={f} at={12} x={70} y={318} text="⏱ apagada há 1 minuto" />
-      <Captions text={shot.text} f={f} dur={dur} y={1486} />
+      <Captions text={shot.text} f={f} dur={dur} y={1396} />
     </AbsoluteFill>
   );
 };
@@ -207,12 +207,32 @@ const S6 = ({f, dur, shot}: SP) => {
           </g>
         </Canvas>
       </Panel>
+      {f2 >= 8 && !bia && (
+        <Panel pts={[[556, 816], [1050, 796], [1050, 1592], [524, 1562]]}>
+          <Canvas>
+            <PopBG a="#3a1c9c" b="#0c0630" dots="#ff2bd6" key2="s6t" />
+            <g transform={`translate(795,${1120 + (Math.floor(f2 / 4) % 2 ? 4 : -4)})`}>
+              <path d="M-178,-84 h356 a84,84 0 0 1 0,168 h-270 l-70,62 l14,-66 a84,84 0 0 1 -30,-164 Z" fill="#2a2f44" stroke={INK} strokeWidth={10} strokeLinejoin="round" />
+              {[0, 1, 2].map((i) => {
+                const up = Math.floor(f2 / 4) % 3 === i;
+                return <circle key={i} cx={-92 + i * 92} cy={up ? -24 : 0} r={up ? 32 : 27} fill={up ? C.yellow : '#c3cae0'} stroke={INK} strokeWidth={7} />;
+              })}
+            </g>
+            <text x={795} y={1338} textAnchor="middle" fontFamily="OswaldC" fontWeight={700} fontSize={58} fill={C.white} stroke={INK} strokeWidth={10} paintOrder="stroke" strokeLinejoin="round">
+              BIA ESTÁ
+            </text>
+            <text x={795} y={1406} textAnchor="middle" fontFamily="OswaldC" fontWeight={700} fontSize={58} fill={C.yellow} stroke={INK} strokeWidth={10} paintOrder="stroke" strokeLinejoin="round">
+              DIGITANDO…
+            </text>
+          </Canvas>
+        </Panel>
+      )}
       {bia && (
         <div style={{position: 'absolute', inset: 0, transform: `translateX(${slide}px)`}}>
           <Panel pts={[[556, 816], [1050, 796], [1050, 1592], [524, 1562]]}>
             <Canvas>
               <PopBG a="#ff2bd6" b="#3a0a4a" dots="#ffe84a" key2="s6b" />
-              <g transform="translate(850,1200) scale(2.05)">
+              <g transform="translate(792,1200) scale(2.05)">
                 <Bust uid="s6b" look="bia" e={biaE} light={LIGHTS.red} f={f} />
               </g>
               <Krackle cx={1040} cy={1570} r={160} n={20} seed={5} color={INK} />
@@ -245,16 +265,18 @@ const S7 = ({f, dur, shot}: SP) => {
           </linearGradient>
         </defs>
         <g transform={`translate(540,1180) scale(${zoom}) translate(-540,-1180)`}>
-          <Facade f={f} />
-          <g clipPath="url(#biaWin)">
-            <g transform={`translate(${540 + Math.sin(f2 / 10) * 3},1262) scale(0.66)`}>
-              <BiaSilhouette glow={0.6 + 0.4 * Math.sin(f2 / 4)} />
+          <g transform="translate(86,0)">
+            <Facade f={f} />
+            <g clipPath="url(#biaWin)">
+              <g transform={`translate(${540 + Math.sin(f2 / 10) * 3},1262) scale(0.66)`}>
+                <BiaSilhouette glow={0.6 + 0.4 * Math.sin(f2 / 4)} />
+              </g>
             </g>
+            <path d="M540,1030 v300 M420,1170 h240" stroke={INK} strokeWidth={8} />
           </g>
-          <path d="M540,1030 v300 M420,1170 h240" stroke={INK} strokeWidth={8} />
         </g>
         <rect x={0} y={0} width={W} height={1000} fill="url(#topShade)" />
-        <g transform={`translate(540,${1812 + Math.sin(f2 / 9) * 3}) scale(1.22)`}>
+        <g transform={`translate(292,${1668 + Math.sin(f2 / 9) * 3}) scale(1.3)`}>
           <BackBust uid="s7" light={{...LIGHTS.night, rimL: C.magenta, rimR: C.cyan}} />
         </g>
       </Canvas>
@@ -265,9 +287,6 @@ const S7 = ({f, dur, shot}: SP) => {
 };
 
 const SCENES: Record<string, (p: SP) => React.ReactElement> = {gancho: S1, engracado: S2, amiga: S3, tres: S4, minuto: S5, twist: S6, enquete: S7};
-// quadros (locais) em que a imagem "falha" em fatias coloridas — as revelações
-const GLITCH: Record<string, number[]> = {gancho: [64], engracado: [44], amiga: [40], tres: [24, 46, 68], twist: [44, 72]};
-
 // ================================================================ montagem
 export const timingOf = (shots: ComicShot[], durations: Record<string, number>) => {
   const frames = shots.map((s) => {
@@ -287,22 +306,9 @@ const Shot = ({i}: {i: number}) => {
   const Scene = SCENES[shot.id];
   const hit = shot.sfx === 'hit';
   const f2 = twos(f);
-  const g0 = (GLITCH[shot.id] ?? []).find((a) => f >= a && f < a + 6);
-  const step = Math.floor(f / 2);
   return (
     <AbsoluteFill>
       <Scene f={f} dur={dur} shot={shot} />
-      {g0 !== undefined &&
-        [0, 1, 2].map((q) => {
-          const top = rnd(step * 13 + q * 7) * 82;
-          const hgt = 5 + rnd(step * 5 + q) * 12;
-          const dx = (rnd(step * 3 + q * 11) - 0.5) * 170;
-          return (
-            <AbsoluteFill key={q} style={{clipPath: `inset(${top}% 0 ${100 - top - hgt}% 0)`, transform: `translateX(${dx}px)`, filter: q % 2 ? 'hue-rotate(110deg) saturate(1.8)' : 'hue-rotate(-70deg) saturate(1.8)'}}>
-              <Scene f={f} dur={dur} shot={shot} />
-            </AbsoluteFill>
-          );
-        })}
       {/* corte: 3 passos de clarão reticulado */}
       {i > 0 && f < 6 && (
         <AbsoluteFill style={{background: hit ? C.magenta : C.yellow, opacity: [0.8, 0.45, 0.18][Math.floor(f2 / 2)], mixBlendMode: 'screen'}} />

@@ -227,7 +227,7 @@ export const CityNight = ({f, base = 1300, px = 0, py = 0, train, sign = true}: 
 // ================================================================ quarto à noite
 export const Bedroom = ({f, px = 0, mood = 0}: {f: number; px?: number; mood?: number}) => {
   const f2 = twos(f);
-  const bars = halftone('bars', 900, 900, 13, '#8fb0ff', (u, v) => (Math.sin(v * 26) > 0.1 ? 0.6 * (1 - u * 0.7) : 0), Math.PI / 5);
+  const bars = halftone('bars2', 900, 900, 13, '#8fb0ff', (u, v) => (Math.sin(v * 26) > 0.1 ? 0.6 * (1 - u * 0.7) : 0) * Math.min(1, (1 - v) * 4) * Math.min(1, v * 6), Math.PI / 5);
   const wallA = mix('#2f1c7c', '#5a1040', mood);
   const wallB = mix('#150c40', '#2a0620', mood);
   return (

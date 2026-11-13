@@ -121,7 +121,7 @@ export const Bust = ({uid, look, e = {}, light = LIGHTS.night, f = 0, body = tru
             return <line key={i} x1={ix + Math.cos(a) * 11} y1={iy + Math.sin(a) * 11} x2={ix + Math.cos(a) * 20} y2={iy + Math.sin(a) * 20} stroke={mix(iris, '#ffd27a', 0.5)} strokeWidth={1.6} opacity={0.7} />;
           })}
           <circle cx={ix} cy={iy} r={11 * pupil} fill={INK} />
-          {glow > 0 && <rect x={ix - 11} y={iy + 2} width={11} height={15} rx={2.5} fill={glowColor} opacity={0.85 * glow} transform={`rotate(-10 ${ix} ${iy})`} />}
+          {glow > 0 && <rect x={ix - 10} y={iy + 4} width={8} height={11} rx={2} fill={mix(glowColor, '#ffffff', 0.5)} opacity={0.6 * glow} transform={`rotate(-10 ${ix} ${iy})`} />}
           <circle cx={ix - 8} cy={iy - 9} r={6.6} fill="#fff" />
           <circle cx={ix + 9} cy={iy + 8} r={3} fill="#fff" opacity={0.85} />
         </g>

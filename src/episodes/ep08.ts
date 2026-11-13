@@ -3,28 +3,33 @@
 // (formato lido pelo tools/gerar-voz.py); o desenho de cada plano está em src/comic/Ep08.tsx.
 import durations from '../../public/audio/ep08/durations.json';
 
-export type ComicShot = {id: string; text: string; tone?: 'suspense' | 'normal'; sfx?: 'hit'};
+// glitch: quadros (dentro do plano) em que a imagem "falha" — aplicado na pós-produção (tools/pos-hq.py)
+export type ComicShot = {id: string; text: string; tone?: 'suspense' | 'normal'; sfx?: 'hit'; glitch?: number[]};
 
 export const shots: ComicShot[] = [
   {
     id: 'gancho',
     text: 'E se você pudesse ler *todas* as mensagens que as pessoas apagaram?',
     sfx: 'hit',
+    glitch: [64],
   },
   {
     id: 'engracado',
     text: 'No começo, é *engraçado.* Seu chefe apagou um elogio.',
+    glitch: [44],
   },
   {
     id: 'amiga',
     text: 'Aí você abre a conversa da sua *melhor amiga.*',
     tone: 'suspense',
+    glitch: [40],
   },
   {
     id: 'tres',
     text: '!Três mensagens apagadas.! Todas sobre *você.*',
     tone: 'suspense',
     sfx: 'hit',
+    glitch: [24, 46, 68],
   },
   {
     id: 'minuto',
@@ -35,6 +40,7 @@ export const shots: ComicShot[] = [
     id: 'twist',
     text: 'Você abre. E ela escreveu: !eu sei que você consegue ler.!',
     sfx: 'hit',
+    glitch: [44, 72],
   },
   {
     id: 'enquete',
@@ -42,4 +48,4 @@ export const shots: ComicShot[] = [
   },
 ];
 
-export const ep08 = {id: 'ep08', tag: 'E SE #8', shots, durations: durations as Record<string, number>};
+export const ep08 = {id: 'ep08', tag: 'E SE #7', shots, durations: durations as Record<string, number>};

@@ -4,7 +4,7 @@
 import durations from '../../public/audio/ep08/durations.json';
 
 // glitch: quadros (dentro do plano) em que a imagem "falha" — aplicado na pós-produção (tools/pos-hq.py)
-export type ComicShot = {id: string; text: string; tone?: 'suspense' | 'normal'; sfx?: 'hit'; glitch?: number[]};
+export type ComicShot = {id: string; text: string; tone?: 'suspense' | 'normal'; sfx?: 'hit'; glitch?: number[]; hold?: number};
 
 export const shots: ComicShot[] = [
   {

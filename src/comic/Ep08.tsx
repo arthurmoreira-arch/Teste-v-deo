@@ -291,7 +291,7 @@ const SCENES: Record<string, (p: SP) => React.ReactElement> = {gancho: S1, engra
 export const timingOf = (shots: ComicShot[], durations: Record<string, number>, pad = 0.3) => {
   const frames = shots.map((s) => {
     const d = durations[s.id];
-    return d ? Math.round((d + pad) * FPS) : 90;
+    return d ? Math.round((d + pad + (s.hold ?? 0)) * FPS) : 90;
   });
   const starts: number[] = [];
   frames.forEach((_, i) => starts.push(i === 0 ? 0 : starts[i - 1] + frames[i - 1]));

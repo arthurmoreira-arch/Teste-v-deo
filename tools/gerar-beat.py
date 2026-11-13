@@ -15,17 +15,21 @@ dur = json.loads((root / "public" / "audio" / ep / "durations.json").read_text()
 _code = (root / "src" / "episodes" / f"{ep}.ts").read_text(encoding="utf-8")
 _m = re.search(r"pad: ([0-9.]+)", _code)
 PAD = float(_m.group(1)) if _m else 0.3
+HOLD = {}
+for _b in re.split(r"\n  \{\n    id: ", _code)[1:]:
+    _h = re.search(r"hold: ([0-9.]+)", _b)
+    HOLD[_b.split("'")[1]] = float(_h.group(1)) if _h else 0.0
 _b = re.search(r"bpm: ([0-9.]+)", _code)
 BPM = float(_b.group(1)) if _b else 140
 STEP = 60 / BPM / 4  # semicolcheia
 BAR = STEP * 16
 ids = list(dur.keys())
-lens = [round((dur[i] + PAD) * FPS) / FPS for i in ids]
+lens = [round((dur[i] + PAD + HOLD.get(i, 0)) * FPS) / FPS for i in ids]
 starts = [sum(lens[:i]) for i in range(len(ids))]
 TOTAL = sum(lens)
 
 # arranjo por cena (na ordem do episódio) e instantes (s, dentro da cena) dos golpes nas revelações
-ARR = {"chip": "intro", "todos": "full", "queda": "break", "bomba": "drop", "cadeira": "tension", "investigacao": "tension", "dia": "drop", "valor": "full", "kress": "break", "importa": "build", "gancho": "intro", "engracado": "full", "amiga": "break", "tres": "tension", "minuto": "build", "twist": "drop", "enquete": "full"}
+ARR = {"entrou": "break", "regra": "tension", "beleza": "break", "cancelada": "tension", "voz": "drop", "espelho": "tension", "msg": "break", "mae": "break", "para": "drop", "eagora": "build", "escolha": "break", "chip": "intro", "todos": "full", "queda": "break", "bomba": "drop", "cadeira": "tension", "investigacao": "tension", "dia": "drop", "valor": "full", "kress": "break", "importa": "build", "gancho": "intro", "engracado": "full", "amiga": "break", "tres": "tension", "minuto": "build", "twist": "drop", "enquete": "full"}
 STABS = {"bomba": [1.6], "dia": [0.4, 1.4], "tres": [1.0, 1.733, 2.467], "twist": [1.667, 2.6], "gancho": [2.2], "engracado": [1.667]}
 
 

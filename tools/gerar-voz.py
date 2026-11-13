@@ -67,6 +67,7 @@ VOICES = {
     "chefe": ("pm_santa", 1.0, 0.93, ""),
     "jane": ("pm_santa", 1.05, 1.0, ""),
     "redjohn": ("pm_alex", 0.86, 0.78, ",lowpass=f=5200,aecho=0.8:0.85:90|180:0.35|0.2"),
+    "vulto": ("pm_alex", 0.8, 0.72, ",lowpass=f=4200,aecho=0.8:0.88:70|160|260:0.4|0.25|0.15,tremolo=f=7:d=0.25"),
 }
 THOUGHT_FX = ",aecho=0.8:0.6:45:0.25"  # falas de personagem soam "dentro da cabeça"
 SUSPENSE = (0.97, 0.96, ",aecho=0.8:0.7:70:0.2")  # narrador em tom de suspense (x velocidade, x pitch, fx)

@@ -81,7 +81,7 @@ export const parseTokens = (text: string): Tok[] => {
   for (let raw of text.split(/\s+/).filter(Boolean)) {
     const sp = raw.match(/^\{(\w+):/);
     if (sp) {
-      speaker = sp[1] === 'redjohn' ? 'red' : 'yellow';
+      speaker = sp[1] === 'redjohn' || sp[1] === 'vulto' ? 'red' : 'yellow';
       raw = raw.slice(sp[0].length);
     }
     let closes = false;

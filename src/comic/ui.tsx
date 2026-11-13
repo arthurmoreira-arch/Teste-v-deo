@@ -146,7 +146,8 @@ export const Thumb = ({skin, sleeve}: {skin: string; sleeve: string}) => {
 
 // ---------------------------------------------------------------- legendas palavra a palavra
 const CAP = {white: C.white, yellow: C.yellow, red: '#ff4a5e'};
-export const Captions = ({text, f, dur, y, size = 104}: {text: string; f: number; dur: number; y: number; size?: number}) => {
+export const Captions = ({text, f, dur, y, size = 104, palette}: {text: string; f: number; dur: number; y: number; size?: number; palette?: Partial<typeof CAP>}) => {
+  const P = {...CAP, ...palette};
   const toks = useMemo(() => parseTokens(text), [text]);
   const pages = useMemo(() => {
     const out: (typeof toks)[] = [];
@@ -182,7 +183,7 @@ export const Captions = ({text, f, dur, y, size = 104}: {text: string; f: number
     <div style={{position: 'absolute', left: 20, right: 20, top: y, display: 'flex', justifyContent: 'center'}}>
       <div style={{display: 'flex', gap: fs * 0.2, transform: `scale(${Math.max(0.01, k)}) rotate(-2deg)`}}>
         {pages[page].map((t, i) => (
-          <Letter key={i} size={fs} color={CAP[t.c]} stroke={fs * 0.11} rot={i % 2 ? 1.5 : -1.5} halo={C.white}>
+          <Letter key={i} size={fs} color={P[t.c]} stroke={fs * 0.11} rot={i % 2 ? 1.5 : -1.5} halo={C.white}>
             {t.w}
           </Letter>
         ))}
@@ -282,3 +283,5 @@ export const Sfx = ({f, at, x, y, text, rot = -8, color = C.yellow, burst = C.re
 export const Tag = ({text}: {text: string}) => (
   <div style={{position: 'absolute', left: 34, top: 56, background: INK, border: `4px solid ${C.yellow}`, borderRadius: 10, padding: '2px 14px', fontFamily: 'BangersX', fontSize: 34, letterSpacing: 2, color: C.yellow, transform: 'rotate(-3deg)'}}>{text}</div>
 );
+
+export {Letter};

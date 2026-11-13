@@ -3,8 +3,12 @@ import {continueRender, delayRender, interpolate, spring, useCurrentFrame, useVi
 import oswald600 from '@fontsource/oswald/files/oswald-latin-600-normal.woff2';
 import oswald700 from '@fontsource/oswald/files/oswald-latin-700-normal.woff2';
 import playfair800 from '@fontsource/playfair-display/files/playfair-display-latin-800-normal.woff2';
-import {Comment, Poll as PollT, Shot, Term, Thought, TitleLine, parseTokens} from './script';
+import {Chat, Comment, Poll as PollT, Shot, Term, Thought, TitleLine, parseTokens} from './script';
 import {useEp} from './ep';
+import {STYLE} from './style';
+
+// sombra dupla rosa/ciano (impressão "fora de registro") no estilo quadrinhos
+const inkShadow = () => (STYLE.verse ? '7px 6px 0 #ff2bd6, -6px -4px 0 #22e0ff, 0 9px 0 #000' : '0 5px 0 #000');
 
 const loadFonts = () => {
   const h = delayRender('fonts');
@@ -66,7 +70,7 @@ const Caption = ({shot}: {shot: Shot}) => {
   return (
     <div style={{position: 'absolute', left: 40, right: 40, top: 1180, textAlign: 'center', fontFamily: 'OswaldX', fontWeight: 700, fontSize: pageLen > 19 ? 84 : pageLen > 16 ? 94 : 104, lineHeight: 1.05, textTransform: 'uppercase', transform: `scale(${0.82 + 0.18 * s})`, opacity: Math.min(1, s * 1.6)}}>
       {pages[page].map((t, i) => (
-        <span key={i} style={{color: COLORS[t.c], marginRight: 22, WebkitTextStroke: '10px #000', paintOrder: 'stroke fill', textShadow: '0 5px 0 #000'}}>
+        <span key={i} style={{color: COLORS[t.c], marginRight: 22, WebkitTextStroke: '10px #000', paintOrder: 'stroke fill', textShadow: inkShadow(), display: 'inline-block', transform: STYLE.verse ? `rotate(${i % 2 ? 1.5 : -1.5}deg)` : undefined}}>
           {t.w}
         </span>
       ))}
@@ -195,7 +199,7 @@ const TitleBar = ({lines, instant}: {lines: TitleLine[]; instant?: boolean}) => 
       {lines.map((l, i) => {
         const k = instant ? 1 : spring({frame: frame - i * 6, fps, config: {damping: 11, stiffness: 190}});
         return (
-          <div key={i} style={{fontFamily: 'OswaldX', fontWeight: 700, fontSize: 108, lineHeight: 1.0, textTransform: 'uppercase', color: COLORS[l.c ?? 'white'], WebkitTextStroke: '10px #000', paintOrder: 'stroke fill', textShadow: '0 6px 0 #000', transform: `scale(${k})`}}>
+          <div key={i} style={{fontFamily: 'OswaldX', fontWeight: 700, fontSize: 108, lineHeight: 1.0, textTransform: 'uppercase', color: COLORS[l.c ?? 'white'], WebkitTextStroke: '10px #000', paintOrder: 'stroke fill', textShadow: STYLE.verse ? inkShadow() : '0 6px 0 #000', transform: `scale(${k}) rotate(${STYLE.verse ? (i % 2 ? 1.2 : -1.2) : 0}deg)`}}>
             {l.t}
           </div>
         );
@@ -225,6 +229,63 @@ const Thoughts = ({items, starts}: {items: Thought[]; starts?: number[]}) => {
         );
       })}
     </>
+  );
+};
+
+/** Celular com conversa: mensagens apagadas tremem e revelam o texto escondido. */
+const ChatPhone = ({chat, hasTitle}: {chat: Chat; hasTitle: boolean}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const k = spring({frame: frame - 1, fps, config: {damping: 13, stiffness: 170}});
+  const top = hasTitle ? 520 : 250;
+  return (
+    <>
+      <div style={{position: 'absolute', inset: 0, background: 'rgba(10,2,30,0.5)'}} />
+      <div style={{position: 'absolute', left: 110, right: 110, top, transform: `rotate(-2.5deg) scale(${0.85 + 0.15 * k})`, opacity: Math.min(1, k * 1.5)}}>
+        <div style={{background: '#0d0f16', border: '10px solid #000', borderRadius: 54, boxShadow: '16px 14px 0 #ff2bd6, -12px -10px 0 #22e0ff', overflow: 'hidden'}}>
+          <div style={{background: '#1c2030', padding: '22px 30px', display: 'flex', alignItems: 'center', gap: 20, borderBottom: '6px solid #000'}}>
+            <div style={{width: 76, height: 76, borderRadius: 38, background: 'linear-gradient(135deg,#ff2bd6,#ffb92e)', border: '5px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'OswaldX', fontWeight: 700, fontSize: 44, color: '#fff'}}>{chat.name.charAt(0)}</div>
+            <div>
+              <div style={{fontFamily: 'OswaldX', fontWeight: 700, fontSize: 48, color: '#fff'}}>{chat.name}</div>
+              <div style={{fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 26, color: '#3ddc84'}}>online</div>
+            </div>
+          </div>
+          <div style={{padding: '26px 26px 30px', display: 'flex', flexDirection: 'column', gap: 18, minHeight: hasTitle ? 380 : 620, background: 'radial-gradient(circle, rgba(255,255,255,0.06) 2px, transparent 2.6px) 0 0 / 16px 16px, #11141f'}}>
+            {chat.msgs.map((m, i) => {
+              const appear = spring({frame: frame - 3 - i * 4, fps, config: {damping: 14, stiffness: 200}});
+              const at = m.at ?? 9999;
+              const revealed = m.deleted && frame >= at + 6;
+              const glitching = m.deleted && frame >= at && frame < at + 6;
+              const jx = glitching ? Math.sin(frame * 9) * 14 : 0;
+              const bg = m.deleted ? (revealed ? '#ffe84a' : '#2a2f42') : m.me ? '#22c97a' : '#e9ecf5';
+              const fg = m.deleted && !revealed ? '#9aa3bd' : '#0b0d14';
+              return (
+                <div key={i} style={{alignSelf: m.me ? 'flex-end' : 'flex-start', maxWidth: '88%', transform: `translateX(${jx}px) scale(${Math.max(0, appear) * (revealed ? 1.04 : 1)})`, transformOrigin: m.me ? 'right center' : 'left center'}}>
+                  <div style={{background: bg, color: fg, border: '6px solid #000', borderRadius: 30, padding: '16px 26px', fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: revealed ? 800 : 500, fontStyle: m.deleted && !revealed ? 'italic' : 'normal', fontSize: 42, lineHeight: 1.2, boxShadow: revealed ? '8px 8px 0 #ff2bd6' : glitching ? '8px 0 0 #ff2bd6, -8px 0 0 #22e0ff' : '6px 6px 0 rgba(0,0,0,.55)'}}>
+                    {m.deleted ? (revealed ? m.reveal : '🚫 Mensagem apagada') : m.t}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+/** Onomatopeia de quadrinhos (BZZT!, PLIM!...). */
+const FxText = ({fx}: {fx: NonNullable<Shot['fxText']>}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const at = fx.at ?? 2;
+  const k = spring({frame: frame - at, fps, config: {damping: 7, stiffness: 240}});
+  const out = interpolate(frame, [at + 22, at + 30], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const step = Math.floor(frame / 2) % 2 ? 2 : -2;
+  return (
+    <div style={{position: 'absolute', left: `${fx.x}%`, top: fx.y, transform: `translateX(-50%) rotate(${(fx.rot ?? -10) + step}deg) scale(${Math.max(0, k)})`, opacity: out, fontFamily: 'OswaldX', fontWeight: 700, fontStyle: 'italic', fontSize: 170, lineHeight: 1, color: fx.color ?? '#ffe84a', WebkitTextStroke: '14px #000', paintOrder: 'stroke fill', textShadow: '12px 10px 0 #ff2bd6, -9px -7px 0 #22e0ff', whiteSpace: 'nowrap'}}>
+      {fx.text}
+    </div>
   );
 };
 
@@ -352,6 +413,8 @@ const Ask = ({text, at = 8}: {text: string; at?: number}) => {
 export const Overlay = ({shot}: {shot: Shot}) => (
   <>
     {(shot.term || shot.agents) && <Screens shot={shot} />}
+    {shot.chat && <ChatPhone chat={shot.chat} hasTitle={!!shot.titleBar} />}
+    {shot.fxText && <FxText fx={shot.fxText} />}
     <Tag />
     {shot.banner && <Banner text={shot.banner} />}
     {shot.titleBar && <TitleBar lines={shot.titleBar} instant={shot.cover} />}

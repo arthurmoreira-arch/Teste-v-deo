@@ -7,6 +7,7 @@ import {Character} from './characters';
 import {City, House, Living, Office, Street, Studio} from './envs';
 import {Shot, V3} from './script';
 import {useEp} from './ep';
+import {STYLE} from './style';
 
 const MOODS = {
   warm: {amb: '#ffd9a8', ambI: 0.75, dir: '#ffcf99', dirI: 1.8, sky: '#1a1226'},
@@ -52,10 +53,14 @@ export const World3D = () => {
   const local = frame - starts[idx];
   const dur = frames(shot);
   const k = interpolate(local, [0, dur], [0, 1], {easing: Easing.inOut(Easing.quad), extrapolateRight: 'clamp'});
-  const t = frame / fps;
+  const verse = STYLE.verse;
+  // "em dois": no estilo quadrinhos os personagens animam a 12 qps (a câmera continua fluida)
+  const t = verse ? (Math.floor(frame / 2) * 2) / fps : frame / fps;
+  const kChar = verse ? Math.min(1, (Math.floor(local / 2) * 2) / dur) : k;
   const m = MOODS[shot.mood ?? 'warm'];
   const night = shot.night ?? 0;
-  const sky = night > 0.5 ? '#070a18' : shot.env === 'street' && night > 0.3 ? '#2a1830' : shot.env === 'street' || shot.env === 'city' ? '#8ec9ff' : m.sky;
+  const sky0 = night > 0.5 ? '#070a18' : shot.env === 'street' && night > 0.3 ? '#2a1830' : shot.env === 'street' || shot.env === 'city' ? '#8ec9ff' : m.sky;
+  const sky = verse ? (night > 0.5 ? '#12063a' : night > 0.3 ? '#3a0f6e' : shot.env === 'street' || shot.env === 'city' ? '#ff5fa8' : '#2a0f52') : sky0;
   const dirI = m.dirI * (1 - night * 0.8);
   const ambI = m.ambI * (1 - night * 0.45);
 
@@ -65,6 +70,9 @@ export const World3D = () => {
       <fog attach="fog" args={[sky, shot.env === 'city' ? 70 : 30, shot.env === 'city' ? 140 : 80]} />
       <Rig shot={shot} k={k} local={local} dur={dur} />
       <ambientLight color={night > 0.5 ? '#3a4a8a' : m.amb} intensity={ambI} />
+      {verse && <directionalLight color="#ff2bd6" intensity={1.5} position={[-9, 5, 4]} />}
+      {verse && <directionalLight color="#22e0ff" intensity={1.3} position={[9, 4, 3]} />}
+      {verse && <hemisphereLight args={['#ffd0f5', '#2a1060', 0.55]} />}
       <directionalLight
         color={night > 0.5 ? '#6f86d8' : m.dir}
         intensity={dirI}
@@ -96,7 +104,7 @@ export const World3D = () => {
         </group>
       )}
       {shot.cast.map((a, i) => {
-        const pos = a.to ? lerp3(a.pos, a.to, k) : a.pos;
+        const pos = a.to ? lerp3(a.pos, a.to, kChar) : a.pos;
         return (
           <group key={i}>
             <Character a={{...a, pos}} t={t} />

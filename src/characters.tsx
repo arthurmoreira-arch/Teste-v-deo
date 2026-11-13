@@ -1,6 +1,18 @@
 import React from 'react';
 import * as THREE from 'three';
 import {Actor, Face, Pose, Who} from './script';
+import {STYLE} from './style';
+
+// degradê de 3 tons para o sombreamento chapado (cel shading)
+let _grad: THREE.DataTexture | null = null;
+const toonGrad = () => {
+  if (!_grad) {
+    _grad = new THREE.DataTexture(new Uint8Array([70, 70, 70, 255, 165, 165, 165, 255, 255, 255, 255, 255]), 3, 1, THREE.RGBAFormat);
+    _grad.minFilter = _grad.magFilter = THREE.NearestFilter;
+    _grad.needsUpdate = true;
+  }
+  return _grad;
+};
 
 const BLACK = '#0b0b0f';
 
@@ -34,10 +46,14 @@ export const Part = ({kind, args, color, pos = [0, 0, 0], rot = [0, 0, 0], scale
   <group position={pos} rotation={rot} scale={scale}>
     <mesh castShadow receiveShadow>
       {geo(kind, args)}
-      <meshStandardMaterial color={color} roughness={0.9} flatShading={false} emissive={emissive ?? '#000000'} emissiveIntensity={emissiveIntensity ?? 0} />
+      {STYLE.verse ? (
+        <meshToonMaterial color={color} gradientMap={toonGrad()} emissive={emissive ?? '#000000'} emissiveIntensity={emissiveIntensity ?? 0} />
+      ) : (
+        <meshStandardMaterial color={color} roughness={0.9} flatShading={false} emissive={emissive ?? '#000000'} emissiveIntensity={emissiveIntensity ?? 0} />
+      )}
     </mesh>
     {outline > 1 && (
-      <mesh scale={[outline, outline, outline]}>
+      <mesh scale={STYLE.verse ? [outline * 1.035, outline * 1.035, outline * 1.035] : [outline, outline, outline]}>
         {geo(kind, args)}
         <meshBasicMaterial color={BLACK} side={THREE.BackSide} />
       </mesh>
@@ -178,6 +194,8 @@ const armsFor = (pose: Pose, t: number, side: 1 | -1): Arms => {
       return {x: Math.sin(t * 5 + (side === 1 ? 0 : Math.PI)) * 0.7, z: side * 0.1};
     case 'sit':
       return {x: -0.2, z: side * 0.08};
+    case 'phone':
+      return {x: -1.0 + Math.sin(t * 2 + side) * 0.03, z: side * -0.42};
     default:
       return {x: Math.sin(t * 1.4 + side) * 0.06, z: side * 0.1};
   }
@@ -229,6 +247,16 @@ export const Character = ({a, t}: {a: Actor; t: number}) => {
         <group position={[-0.36, 1.16, 0]} rotation={[R.x, 0, -R.z]}>
           <Part kind="capsule" args={[0.095, 0.38]} color={look.sleeves} pos={[0, -0.26, 0]} />
         </group>
+        {pose === 'phone' && (
+          <group position={[0, 1.02, 0.44]} rotation={[-0.5, 0, 0]}>
+            <Part kind="box" args={[0.2, 0.36, 0.03]} color="#0c0c12" outline={1.12} />
+            <mesh position={[0, 0, 0.02]}>
+              <planeGeometry args={[0.17, 0.32]} />
+              <meshBasicMaterial color="#9ff3ff" />
+            </mesh>
+            <pointLight color="#7fe9ff" intensity={1.6} distance={2.2} position={[0, 0.2, 0.3]} />
+          </group>
+        )}
         {/* cabeça */}
         <group position={[0, 1.7, 0]} rotation={[headTilt, Math.sin(t * 0.9) * 0.06, 0]}>
           <Part kind="sphere" args={[0.34]} color={look.skin} scale={[1, 1.03, 1]} outline={1.07} />

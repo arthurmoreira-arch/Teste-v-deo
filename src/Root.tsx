@@ -7,6 +7,7 @@ import {ep03} from './episodes/ep03';
 import {ep04} from './episodes/ep04';
 import {ep05} from './episodes/ep05';
 import {ep06} from './episodes/ep06';
+import {ep07} from './episodes/ep07';
 import {ia01} from './episodes/ia01';
 import {story01} from './episodes/story01';
 
@@ -22,6 +23,7 @@ export const Root = () => (
     {comp('EseMentalista4', ep04)}
     {comp('EseMentalista5', ep05)}
     {comp('EseTempo', ep06)}
+    {comp('EseApagadas', ep07)}
     {comp('FeitoPorIA', ia01)}
     {comp('Story01', story01)}
   </>

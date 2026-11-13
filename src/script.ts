@@ -10,7 +10,7 @@ export type V3 = [number, number, number];
 export type Cam = {p: V3; l: V3};
 export type Env = 'studio' | 'living' | 'office' | 'city' | 'house' | 'street';
 export type Who = 'jane' | 'angela' | 'charlotte' | 'lisbon' | 'redjohn' | 'mannequin' | 'voce' | 'mae' | 'chefe';
-export type Pose = 'stand' | 'walk' | 'sit' | 'zombie' | 'cry' | 'clap';
+export type Pose = 'stand' | 'walk' | 'sit' | 'zombie' | 'cry' | 'clap' | 'phone';
 export type Face = 'neutral' | 'smirk' | 'shock' | 'sad' | 'angry' | 'talk';
 
 export type Actor = {
@@ -28,6 +28,8 @@ export type Hud = {label: string; from: number; to: number; prefix?: string; suf
 export type Poll = {title: string; highlight?: string; options: string[]; footer?: string};
 export type TitleLine = {t: string; c?: 'white' | 'yellow' | 'red'};
 export type Thought = {text: string; x: number; y: number; red?: boolean; at?: number};
+export type ChatMsg = {t: string; me?: boolean; deleted?: boolean; reveal?: string; at?: number};
+export type Chat = {name: string; msgs: ChatMsg[]};
 export type Term = {title?: string; lines: string[]; half?: boolean};
 export type Comment = {user: string; text: string; ago?: string};
 
@@ -48,6 +50,8 @@ export type Shot = {
   ask?: {text: string; at?: number}; // figurinha de pergunta/pedido no meio do vídeo (comentário/envio)
   titleBar?: TitleLine[]; // faixa escura no topo com a premissa (como no vídeo de referência)
   thoughts?: Thought[]; // balões de pensamento na tela
+  chat?: Chat; // celular com conversa (mensagens apagadas que se revelam)
+  fxText?: {text: string; x: number; y: number; rot?: number; color?: string; at?: number}; // onomatopeia de quadrinhos
   term?: Term; // janela de terminal com código sendo digitado
   agents?: {icon: string; name: string}[]; // cartões de etapas (roteiro, voz, animação...)
   timers?: Thought[]; // etiquetas de "tempo de vida" flutuando sobre as cabeças
@@ -107,6 +111,7 @@ export type Episode = {
   tag: string; // "E SE #1"
   shots: Shot[];
   durations: Record<string, number>; // segundos de narração por shot (gerado por tools/gerar-voz.py)
+  style?: 'verse'; // estilo quadrinhos
   narrator?: Who; // quem narra (padrão: narrador). Ex.: 'voce' para o boneco falar direto com a galera
   lines?: Record<string, number[]>; // início (s) de cada fala de personagem no shot
 };

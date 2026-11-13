@@ -3,7 +3,7 @@ import {continueRender, delayRender, interpolate, spring, useCurrentFrame, useVi
 import oswald600 from '@fontsource/oswald/files/oswald-latin-600-normal.woff2';
 import oswald700 from '@fontsource/oswald/files/oswald-latin-700-normal.woff2';
 import playfair800 from '@fontsource/playfair-display/files/playfair-display-latin-800-normal.woff2';
-import {Comment, Poll as PollT, Shot, Thought, TitleLine, parseTokens} from './script';
+import {Comment, Poll as PollT, Shot, Term, Thought, TitleLine, parseTokens} from './script';
 import {useEp} from './ep';
 
 const loadFonts = () => {
@@ -228,6 +228,83 @@ const Thoughts = ({items, starts}: {items: Thought[]; starts?: number[]}) => {
   );
 };
 
+const MONO = '"DejaVu Sans Mono", "Liberation Mono", monospace';
+
+/** Janela de terminal com o código sendo digitado (formato "feito por IA"). */
+const Terminal = ({term, dur, hasTitle, cover}: {term: Term; dur: number; hasTitle: boolean; cover?: boolean}) => {
+  const frame = useCurrentFrame();
+  const total = term.lines.join('\n').length;
+  const typed = Math.floor(interpolate(frame, [2, Math.max(12, dur * 0.82)], [cover ? term.lines[0].length : 0, total], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}));
+  let left = typed;
+  const top = term.half ? 250 : hasTitle ? 540 : 300;
+  const height = term.half ? 580 : hasTitle ? 600 : 840;
+  return (
+    <>
+      {!term.half && <div style={{position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 35%, #1b2340 0%, #07090f 75%)'}} />}
+      <div style={{position: 'absolute', left: 46, right: 46, top, height, background: 'rgba(10,13,22,0.96)', borderRadius: 30, border: '3px solid #2a3350', boxShadow: '0 30px 80px rgba(0,0,0,.7), 0 0 60px rgba(80,140,255,.18)', overflow: 'hidden'}}>
+        <div style={{height: 70, background: '#161c2e', display: 'flex', alignItems: 'center', padding: '0 26px', gap: 14}}>
+          {['#ff5f57', '#febc2e', '#28c840'].map((c) => <div key={c} style={{width: 24, height: 24, borderRadius: 12, background: c}} />)}
+          <div style={{marginLeft: 18, fontFamily: MONO, fontSize: 28, color: '#8b97b8'}}>{term.title ?? 'claude — e-se-pop'}</div>
+        </div>
+        <div style={{padding: '26px 32px', fontFamily: MONO, fontSize: term.half ? 44 : 47, lineHeight: 1.42}}>
+          {term.lines.map((ln, i) => {
+            const show = Math.max(0, Math.min(ln.length, left));
+            left -= ln.length + 1;
+            if (show <= 0 && left < -ln.length - 1 + 1) return null;
+            const done = show >= ln.length;
+            const color = ln.startsWith('>') ? '#ffffff' : ln.startsWith('✓') ? '#3ddc84' : ln.startsWith('//') ? '#6f7da3' : '#8fd3ff';
+            return (
+              <div key={i} style={{color, fontWeight: ln.startsWith('>') ? 700 : 400, whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}>
+                {ln.slice(0, show)}
+                {!done && <span style={{background: '#fff', color: '#000', opacity: frame % 10 < 6 ? 1 : 0.2}}> </span>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+};
+
+/** Cartões das etapas do trabalho, cada um com barra de progresso e check. */
+const Agents = ({items, dur}: {items: {icon: string; name: string}[]; dur: number}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  return (
+    <>
+      <div style={{position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 35%, #1b2340 0%, #07090f 75%)'}} />
+      <div style={{position: 'absolute', left: 60, right: 60, top: 300, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 34}}>
+        {items.map((a, i) => {
+          const at = 4 + i * Math.max(6, Math.floor((dur * 0.45) / items.length));
+          const k = spring({frame: frame - at, fps, config: {damping: 11, stiffness: 180}});
+          const prog = interpolate(frame, [at + 6, at + 6 + dur * 0.4], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+          const done = prog >= 1;
+          return (
+            <div key={a.name} style={{background: '#121829', border: `4px solid ${done ? '#3ddc84' : '#2a3350'}`, borderRadius: 34, padding: '34px 26px', textAlign: 'center', transform: `scale(${Math.max(0, k)})`, boxShadow: done ? '0 0 40px rgba(61,220,132,.35)' : '0 16px 40px rgba(0,0,0,.5)'}}>
+              <div style={{fontSize: 120, lineHeight: 1.1}}>{a.icon}</div>
+              <div style={{fontFamily: 'OswaldX', fontWeight: 700, fontSize: 58, color: '#fff', textTransform: 'uppercase', marginTop: 6}}>{a.name}</div>
+              <div style={{height: 18, borderRadius: 9, background: '#232b45', marginTop: 20, overflow: 'hidden'}}>
+                <div style={{height: '100%', width: `${prog * 100}%`, background: done ? '#3ddc84' : '#f7c61a'}} />
+              </div>
+              <div style={{fontFamily: MONO, fontSize: 30, color: done ? '#3ddc84' : '#8b97b8', marginTop: 12}}>{done ? '✓ pronto' : `${Math.round(prog * 100)}%`}</div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+};
+
+const Screens = ({shot}: {shot: Shot}) => {
+  const dur = useEp().frames(shot);
+  return (
+    <>
+      {shot.term && <Terminal term={shot.term} dur={dur} hasTitle={!!shot.titleBar} cover={shot.cover} />}
+      {shot.agents && <Agents items={shot.agents} dur={dur} />}
+    </>
+  );
+};
+
 /** Etiquetas de contagem (ex.: tempo de vida) flutuando sobre as cabeças. */
 const Timers = ({items}: {items: Thought[]}) => {
   const frame = useCurrentFrame();
@@ -274,6 +351,7 @@ const Ask = ({text, at = 8}: {text: string; at?: number}) => {
 
 export const Overlay = ({shot}: {shot: Shot}) => (
   <>
+    {(shot.term || shot.agents) && <Screens shot={shot} />}
     <Tag />
     {shot.banner && <Banner text={shot.banner} />}
     {shot.titleBar && <TitleBar lines={shot.titleBar} instant={shot.cover} />}

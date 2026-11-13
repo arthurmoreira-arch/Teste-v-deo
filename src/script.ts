@@ -28,6 +28,7 @@ export type Hud = {label: string; from: number; to: number; prefix?: string; suf
 export type Poll = {title: string; highlight?: string; options: string[]; footer?: string};
 export type TitleLine = {t: string; c?: 'white' | 'yellow' | 'red'};
 export type Thought = {text: string; x: number; y: number; red?: boolean; at?: number};
+export type Term = {title?: string; lines: string[]; half?: boolean};
 export type Comment = {user: string; text: string; ago?: string};
 
 export type Shot = {
@@ -47,6 +48,8 @@ export type Shot = {
   ask?: {text: string; at?: number}; // figurinha de pergunta/pedido no meio do vídeo (comentário/envio)
   titleBar?: TitleLine[]; // faixa escura no topo com a premissa (como no vídeo de referência)
   thoughts?: Thought[]; // balões de pensamento na tela
+  term?: Term; // janela de terminal com código sendo digitado
+  agents?: {icon: string; name: string}[]; // cartões de etapas (roteiro, voz, animação...)
   timers?: Thought[]; // etiquetas de "tempo de vida" flutuando sobre as cabeças
   banner?: string; // título de gancho no topo (primeiros 2s)
   sfx?: 'hit' | 'whoosh'; // efeito sonoro no início do plano

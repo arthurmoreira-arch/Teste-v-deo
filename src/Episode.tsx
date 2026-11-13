@@ -33,6 +33,7 @@ const Body = () => {
     </AbsoluteFill>
     {ep.shots.map((s, i) => (
       <Sequence key={s.id} from={starts[i]} durationInFrames={frames(s)}>
+        {s.term && <Audio src={staticFile('audio/type.mp3')} volume={0.5} />}
         {s.tone === 'suspense' && <Audio src={staticFile('audio/tension.mp3')} volume={0.55} />}
         {!s.cover && <Flash hit={s.sfx === 'hit'} />}
         <Overlay shot={s} />

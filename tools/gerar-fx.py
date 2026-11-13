@@ -103,6 +103,16 @@ for k in np.arange(0.3, D2, 1.4):
 ten *= np.minimum(1, t / 0.4)
 save("tension", ten / np.max(np.abs(ten)) * 0.8)
 
+# ---- teclado (digitação no terminal)
+D3 = 8; ty = np.zeros(D3 * SR); pos = 0.05
+while pos < D3 - 0.1:
+    i = int(pos * SR); n = int(0.012 * SR); tt = np.arange(n) / SR
+    click = rng.standard_normal(n) * np.exp(-tt * 420) * (0.5 + 0.5 * rng.random())
+    ty[i:i + n] += click
+    ty[i:i + n] += 0.4 * np.sin(2 * np.pi * (1800 + 900 * rng.random()) * tt) * np.exp(-tt * 300)
+    pos += 0.045 + 0.07 * rng.random()
+save("type", ty / np.max(np.abs(ty)) * 0.6)
+
 # ---- impacto (hit)
 n = int(1.6 * SR); tt = np.arange(n) / SR
 hit = np.sin(2 * np.pi * (150 * np.exp(-tt * 3.2) + 32) * tt) * np.exp(-tt * 3.0)

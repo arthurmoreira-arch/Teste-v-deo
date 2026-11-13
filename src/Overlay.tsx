@@ -79,7 +79,7 @@ const Caption = ({shot}: {shot: Shot}) => {
 };
 
 const Hud = ({shot}: {shot: Shot}) => {
-  const top = shot.titleBar ? 560 : 320;
+  const top = shot.titleBar ? 560 : shot.ask ? 500 : 320;
   const frame = useCurrentFrame();
   const dur = useEp().frames(shot);
   if (!shot.hud) return null;
@@ -233,14 +233,13 @@ const Thoughts = ({items, starts}: {items: Thought[]; starts?: number[]}) => {
 };
 
 /** Celular com conversa: mensagens apagadas tremem e revelam o texto escondido. */
-const ChatPhone = ({chat, hasTitle}: {chat: Chat; hasTitle: boolean}) => {
+const ChatPhone = ({chat, hasTitle, cover}: {chat: Chat; hasTitle: boolean; cover?: boolean}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const k = spring({frame: frame - 1, fps, config: {damping: 13, stiffness: 170}});
+  const k = cover ? 1 : spring({frame: frame - 1, fps, config: {damping: 13, stiffness: 170}});
   const top = hasTitle ? 520 : 250;
   return (
     <>
-      <div style={{position: 'absolute', inset: 0, background: 'rgba(10,2,30,0.5)'}} />
       <div style={{position: 'absolute', left: 110, right: 110, top, transform: `rotate(-2.5deg) scale(${0.85 + 0.15 * k})`, opacity: Math.min(1, k * 1.5)}}>
         <div style={{background: '#0d0f16', border: '10px solid #000', borderRadius: 54, boxShadow: '16px 14px 0 #ff2bd6, -12px -10px 0 #22e0ff', overflow: 'hidden'}}>
           <div style={{background: '#1c2030', padding: '22px 30px', display: 'flex', alignItems: 'center', gap: 20, borderBottom: '6px solid #000'}}>
@@ -250,9 +249,9 @@ const ChatPhone = ({chat, hasTitle}: {chat: Chat; hasTitle: boolean}) => {
               <div style={{fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 26, color: '#3ddc84'}}>online</div>
             </div>
           </div>
-          <div style={{padding: '26px 26px 30px', display: 'flex', flexDirection: 'column', gap: 18, minHeight: hasTitle ? 380 : 620, background: 'radial-gradient(circle, rgba(255,255,255,0.06) 2px, transparent 2.6px) 0 0 / 16px 16px, #11141f'}}>
+          <div style={{padding: '26px 26px 30px', display: 'flex', flexDirection: 'column', gap: 18, minHeight: hasTitle ? 330 : 520, background: 'radial-gradient(circle, rgba(255,255,255,0.06) 2px, transparent 2.6px) 0 0 / 16px 16px, #11141f'}}>
             {chat.msgs.map((m, i) => {
-              const appear = spring({frame: frame - 3 - i * 4, fps, config: {damping: 14, stiffness: 200}});
+              const appear = cover ? 1 : spring({frame: frame - 3 - i * 4, fps, config: {damping: 14, stiffness: 200}});
               const at = m.at ?? 9999;
               const revealed = m.deleted && frame >= at + 6;
               const glitching = m.deleted && frame >= at && frame < at + 6;
@@ -413,7 +412,7 @@ const Ask = ({text, at = 8}: {text: string; at?: number}) => {
 export const Overlay = ({shot}: {shot: Shot}) => (
   <>
     {(shot.term || shot.agents) && <Screens shot={shot} />}
-    {shot.chat && <ChatPhone chat={shot.chat} hasTitle={!!shot.titleBar} />}
+    {shot.chat && <ChatPhone chat={shot.chat} hasTitle={!!shot.titleBar} cover={shot.cover} />}
     {shot.fxText && <FxText fx={shot.fxText} />}
     <Tag />
     {shot.banner && <Banner text={shot.banner} />}

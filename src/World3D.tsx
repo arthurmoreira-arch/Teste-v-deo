@@ -23,6 +23,11 @@ const Rig = ({shot, k, local, dur}: {shot: Shot; k: number; local: number; dur: 
   useLayoutEffect(() => {
     const p = lerp3(shot.cam[0].p, shot.cam[1].p, k);
     const l = lerp3(shot.cam[0].l, shot.cam[1].l, k);
+    // planos com celular na tela: desce o personagem para o terço de baixo (o rosto não fica atrás do celular)
+    if (shot.chat) {
+      const dist = Math.hypot(p[0] - l[0], p[1] - l[1], p[2] - l[2]);
+      l[1] += dist * 0.3;
+    }
     // tremida nos planos de impacto + "zoom punch" no início de todo corte
     const hit = shot.sfx === 'hit' && local < 14 ? Math.exp(-local / 4) : 0;
     const sh = hit * 0.09;
@@ -34,7 +39,7 @@ const Rig = ({shot, k, local, dur}: {shot: Shot; k: number; local: number; dur: 
     const punch = local < 9 ? (1 - local / 9) * 7 : 0;
     // corte interno: em planos longos a câmera "pula" para mais perto na metade (mais ritmo, sem mudar a cena)
     const half = Math.round(dur * 0.52);
-    const cutIn = dur > 80 && !shot.poll && local >= half;
+    const cutIn = dur > 80 && !shot.poll && !shot.chat && local >= half;
     const cutPunch = cutIn && local - half < 7 ? (1 - (local - half) / 7) * 5 : 0;
     (camera as THREE.PerspectiveCamera).fov = (shot.fov ?? 55) - punch - (cutIn ? 11 : 0) - cutPunch;
     camera.updateProjectionMatrix();
@@ -72,7 +77,7 @@ export const World3D = () => {
       <ambientLight color={night > 0.5 ? '#3a4a8a' : m.amb} intensity={ambI} />
       {verse && <directionalLight color="#ff2bd6" intensity={1.5} position={[-9, 5, 4]} />}
       {verse && <directionalLight color="#22e0ff" intensity={1.3} position={[9, 4, 3]} />}
-      {verse && <hemisphereLight args={['#ffd0f5', '#2a1060', 0.55]} />}
+      {verse && <hemisphereLight args={['#ffd0f5', '#3a2080', 1.0]} />}
       <directionalLight
         color={night > 0.5 ? '#6f86d8' : m.dir}
         intensity={dirI}

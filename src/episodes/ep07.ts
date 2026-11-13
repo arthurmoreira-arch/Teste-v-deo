@@ -55,7 +55,7 @@ export const shots: Shot[] = [
         {t: 'ok 👍', me: true},
       ],
     },
-    fxText: {text: 'PLIM!', x: 74, y: 1380, rot: 8, at: 42},
+    fxText: {text: 'PLIM!', x: 68, y: 1640, rot: 8, at: 42},
   },
   {
     id: 'amiga',
@@ -89,7 +89,7 @@ export const shots: Shot[] = [
         {t: '', deleted: true, reveal: 'conto ou não conto?', at: 66},
       ],
     },
-    fxText: {text: 'BZZT!', x: 28, y: 1400, rot: -12, color: '#ff4040', at: 22},
+    fxText: {text: 'BZZT!', x: 32, y: 1650, rot: -12, color: '#ff4040', at: 22},
     sfx: 'hit',
   },
   {

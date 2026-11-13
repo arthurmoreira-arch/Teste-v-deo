@@ -34,26 +34,11 @@ const Body = () => {
   for (let i = 0; i < ep.shots.length; i++) if (frame < starts[i] + frames(ep.shots[i])) { idx = i; break; }
   const local = frame - starts[idx];
   const hitShot = ep.shots[idx].sfx === 'hit';
-  // separação de cores (vermelho/azul): leve o tempo todo, forte nos primeiros quadros de cada corte
-  const burst = local < 6 && !ep.shots[idx].cover ? (1 - local / 6) * (hitShot ? 22 : 12) : 0;
-  const d = 3 + burst;
+  // a separação de cores (vermelho/azul) é aplicada na pós-produção: tools/pos-verse.py
   return (
   <AbsoluteFill style={{backgroundColor: '#050507'}}>
-    {verse && (
-      <svg width="0" height="0" style={{position: 'absolute'}}>
-        <filter id="chroma" x="-5%" y="-5%" width="110%" height="110%">
-          <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
-          <feOffset in="r" dx={d} dy={d * 0.3} result="ro" />
-          <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g" />
-          <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
-          <feOffset in="b" dx={-d} dy={-d * 0.3} result="bo" />
-          <feBlend in="ro" in2="g" mode="screen" result="rg" />
-          <feBlend in="rg" in2="bo" mode="screen" />
-        </filter>
-      </svg>
-    )}
     {/* correção de cor: mais contraste e saturação, look mais "finalizado" */}
-    <AbsoluteFill style={{filter: verse ? 'url(#chroma) contrast(1.18) saturate(1.55) brightness(1.04)' : 'contrast(1.1) saturate(1.2) brightness(1.03)'}}>
+    <AbsoluteFill style={{filter: verse ? 'contrast(1.18) saturate(1.55) brightness(1.04)' : 'contrast(1.1) saturate(1.2) brightness(1.03)'}}>
       <World3D />
     </AbsoluteFill>
     {verse && (

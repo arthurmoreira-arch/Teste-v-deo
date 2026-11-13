@@ -62,8 +62,8 @@ def glitch_frame(img, seed, power):
 dec = subprocess.Popen(["ffmpeg", "-v", "error", "-i", src, "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], stdout=subprocess.PIPE)
 enc = subprocess.Popen(
     ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-i", src,
-     "-map", "0:v", "-map", "1:a", "-af", "alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5", "-c:v", "libx264", "-crf", "18", "-preset", "medium",
-     "-pix_fmt", "yuv420p", "-b:a", "192k", "-movflags", "+faststart", dst],
+     "-map", "0:v", "-map", "1:a", "-af", "alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5,afade=t=in:d=0.03,aresample=48000,alimiter=limit=0.71:level=false:attack=2:release=40", "-c:v", "libx264", "-crf", "18", "-preset", "medium",
+     "-pix_fmt", "yuv420p", "-ar", "48000", "-b:a", "192k", "-movflags", "+faststart", dst],
     stdin=subprocess.PIPE,
 )
 size, n, done = W * H * 3, 0, 0

@@ -24,6 +24,6 @@ for i, (sid, d) in enumerate(dur.items()):
     t += round((d + 0.3) * FPS) / FPS
 
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-vf", ",".join(filters),
-                "-af", "alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5", "-c:v", "libx264", "-crf", "20", "-preset", "medium",
-                "-pix_fmt", "yuv420p", "-b:a", "192k", dst], check=True)
+                "-af", "alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5,afade=t=in:d=0.03,aresample=48000,alimiter=limit=0.71:level=false:attack=2:release=40", "-c:v", "libx264", "-crf", "20", "-preset", "medium",
+                "-pix_fmt", "yuv420p", "-ar", "48000", "-b:a", "192k", dst], check=True)
 print("ok", dst)

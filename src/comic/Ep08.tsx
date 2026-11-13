@@ -288,10 +288,10 @@ const S7 = ({f, dur, shot}: SP) => {
 
 const SCENES: Record<string, (p: SP) => React.ReactElement> = {gancho: S1, engracado: S2, amiga: S3, tres: S4, minuto: S5, twist: S6, enquete: S7};
 // ================================================================ montagem
-export const timingOf = (shots: ComicShot[], durations: Record<string, number>) => {
+export const timingOf = (shots: ComicShot[], durations: Record<string, number>, pad = 0.3) => {
   const frames = shots.map((s) => {
     const d = durations[s.id];
-    return d ? Math.round((d + 0.3) * FPS) : 90;
+    return d ? Math.round((d + pad) * FPS) : 90;
   });
   const starts: number[] = [];
   frames.forEach((_, i) => starts.push(i === 0 ? 0 : starts[i - 1] + frames[i - 1]));

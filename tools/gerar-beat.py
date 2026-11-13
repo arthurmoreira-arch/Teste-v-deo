@@ -8,20 +8,25 @@ import numpy as np
 
 root = pathlib.Path(__file__).resolve().parent.parent
 ep = sys.argv[1] if len(sys.argv) > 1 else "ep08"
-SR, FPS, BPM = 44100, 30, 140
-STEP = 60 / BPM / 4  # semicolcheia
-BAR = STEP * 16
+SR, FPS = 44100, 30
 rng = np.random.default_rng(11)
 
 dur = json.loads((root / "public" / "audio" / ep / "durations.json").read_text())
+_code = (root / "src" / "episodes" / f"{ep}.ts").read_text(encoding="utf-8")
+_m = re.search(r"pad: ([0-9.]+)", _code)
+PAD = float(_m.group(1)) if _m else 0.3
+_b = re.search(r"bpm: ([0-9.]+)", _code)
+BPM = float(_b.group(1)) if _b else 140
+STEP = 60 / BPM / 4  # semicolcheia
+BAR = STEP * 16
 ids = list(dur.keys())
-lens = [round((dur[i] + 0.3) * FPS) / FPS for i in ids]
+lens = [round((dur[i] + PAD) * FPS) / FPS for i in ids]
 starts = [sum(lens[:i]) for i in range(len(ids))]
 TOTAL = sum(lens)
 
 # arranjo por cena (na ordem do episódio) e instantes (s, dentro da cena) dos golpes nas revelações
-ARR = {"gancho": "intro", "engracado": "full", "amiga": "break", "tres": "tension", "minuto": "build", "twist": "drop", "enquete": "full"}
-STABS = {"tres": [1.0, 1.733, 2.467], "twist": [1.667, 2.6], "gancho": [2.2], "engracado": [1.667]}
+ARR = {"chip": "intro", "todos": "full", "queda": "break", "bomba": "drop", "cadeira": "tension", "investigacao": "tension", "dia": "drop", "valor": "full", "kress": "break", "importa": "build", "gancho": "intro", "engracado": "full", "amiga": "break", "tres": "tension", "minuto": "build", "twist": "drop", "enquete": "full"}
+STABS = {"bomba": [1.6], "dia": [0.4, 1.4], "tres": [1.0, 1.733, 2.467], "twist": [1.667, 2.6], "gancho": [2.2], "engracado": [1.667]}
 
 
 def filt(x, lo=None, hi=None):

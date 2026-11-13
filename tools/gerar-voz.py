@@ -19,6 +19,10 @@ if not shots:
 # As palavrinhas antes do nome (o, a, e, de, nem...) e a pontuação depois entram no mesmo bloco,
 # senão o Piper as lê isoladas ("Ô Jane") e perde a pausa da vírgula/ponto.
 NAMES = [
+    (r"Nvidia", "ẽnvˈidʒjɐ"),
+    (r"Jensen Huang", "dʒˈẽsẽn wˈɐ̃ŋ"),
+    (r"Colette Kress", "kolˈɛtʃi krˈɛs"),
+    (r"IA", "i ˈa"),
     (r"@lyncowndetona", "lˈĩŋkoun detˈonɐ"),
     (r"Patrick Jane", "pˈatɾik dʒˈeɪn"),
     (r"Jane", "dʒˈeɪn"),
@@ -93,6 +97,10 @@ def to_phonemes(text: str) -> str:
     return re.sub(r"\s+([.,?!:;])", r"\1", " ".join(out))
 
 # episódio pode trocar quem narra:  narrator: 'voce'  (ex.: story em que o próprio boneco fala)
+_sp = re.search(r"voiceSpeed: ([0-9.]+)", src)
+if _sp:  # episódio pode pedir narração mais lenta/rápida
+    for k, (v, sp, pi, fx) in list(VOICES.items()):
+        VOICES[k] = (v, sp * float(_sp.group(1)), pi, fx)
 _nm = re.search(r"narrator: '(\w+)'", src)
 if _nm and _nm.group(1) in VOICES:
     VOICES["narrador"] = VOICES[_nm.group(1)]

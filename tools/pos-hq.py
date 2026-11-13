@@ -13,6 +13,9 @@ ep, src, dst = sys.argv[1], sys.argv[2], sys.argv[3]
 OFFSET = int(sys.argv[4]) if len(sys.argv) > 4 else 0  # só para testes com um trecho do vídeo
 FPS = 30
 dur = json.loads((root / "public" / "audio" / ep / "durations.json").read_text())
+_code = (root / "src" / "episodes" / f"{ep}.ts").read_text(encoding="utf-8")
+_m = re.search(r"pad: ([0-9.]+)", _code)
+PAD = float(_m.group(1)) if _m else 0.3
 code = (root / "src" / "episodes" / f"{ep}.ts").read_text(encoding="utf-8")
 blocks = re.split(r"\n  \{\n    id: ", code)[1:]
 glitch = {}
@@ -26,7 +29,7 @@ for sid, d in dur.items():
     for a in glitch.get(sid, []):
         for k in range(6):
             frames[start + a + k] = (start + a, k // 2)
-    start += round((d + 0.3) * FPS)
+    start += round((d + PAD) * FPS)
 
 _wh = subprocess.check_output(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0", src]).decode()
 W, H = [int(x) for x in re.split(r"[,\s]+", _wh) if x][:2]

@@ -9,6 +9,8 @@ import {ep05} from './episodes/ep05';
 import {ep06} from './episodes/ep06';
 import {ep07} from './episodes/ep07';
 import {ia01} from './episodes/ia01';
+import {ComicTest} from './comic/Test';
+import {ComicEp08, ep08Timing} from './comic/Ep08';
 import {story01} from './episodes/story01';
 
 const comp = (id: string, ep: Ep) => (
@@ -26,5 +28,7 @@ export const Root = () => (
     {comp('EseApagadas', ep07)}
     {comp('FeitoPorIA', ia01)}
     {comp('Story01', story01)}
+    <Composition id="EseApagadasHQ" component={ComicEp08} durationInFrames={ep08Timing.total} fps={FPS} width={WIDTH} height={HEIGHT} />
+    <Composition id="ComicTest" component={ComicTest} durationInFrames={120} fps={FPS} width={WIDTH} height={HEIGHT} />
   </>
 );

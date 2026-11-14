@@ -29,7 +29,7 @@ starts = [sum(lens[:i]) for i in range(len(ids))]
 TOTAL = sum(lens)
 
 # arranjo por cena (na ordem do episódio) e instantes (s, dentro da cena) dos golpes nas revelações
-ARR = {"entrou": "break", "regra": "tension", "beleza": "break", "cancelada": "tension", "voz": "drop", "espelho": "tension", "msg": "break", "mae": "break", "para": "drop", "eagora": "build", "escolha": "break", "chip": "intro", "todos": "full", "queda": "break", "bomba": "drop", "cadeira": "tension", "investigacao": "tension", "dia": "drop", "valor": "full", "kress": "break", "importa": "build", "gancho": "intro", "engracado": "full", "amiga": "break", "tres": "tension", "minuto": "build", "twist": "drop", "enquete": "full"}
+ARR = {"carros": "full", "calcada": "break", "perto": "drop", "beco": "full", "policial": "break", "sorriram": "tension", "achei": "drop", "trem": "full", "reflexo": "build", "escolha": "break", "entrou": "break", "regra": "tension", "beleza": "break", "cancelada": "tension", "voz": "drop", "espelho": "tension", "msg": "break", "mae": "break", "para": "drop", "eagora": "build", "escolha": "break", "chip": "intro", "todos": "full", "queda": "break", "bomba": "drop", "cadeira": "tension", "investigacao": "tension", "dia": "drop", "valor": "full", "kress": "break", "importa": "build", "gancho": "intro", "engracado": "full", "amiga": "break", "tres": "tension", "minuto": "build", "twist": "drop", "enquete": "full"}
 STABS = {"bomba": [1.6], "dia": [0.4, 1.4], "tres": [1.0, 1.733, 2.467], "twist": [1.667, 2.6], "gancho": [2.2], "engracado": [1.667]}
 
 

@@ -13,6 +13,7 @@ import {ComicTest} from './comic/Test';
 import {ComicEp08, ep08Timing} from './comic/Ep08';
 import {ComicEp09, ep09Timing} from './comic/Ep09';
 import {ComicEp10, ep10Timing} from './comic/Ep10';
+import {ComicEp11, ep11Timing} from './comic/Ep11';
 import {story01} from './episodes/story01';
 
 const comp = (id: string, ep: Ep) => (
@@ -33,6 +34,7 @@ export const Root = () => (
     <Composition id="EseApagadasHQ" component={ComicEp08} durationInFrames={ep08Timing.total} fps={FPS} width={WIDTH} height={HEIGHT} />
     <Composition id="CaosNvidia" component={ComicEp09} durationInFrames={ep09Timing.total} fps={FPS} width={WIDTH} height={HEIGHT} />
     <Composition id="UltimaCorrida" component={ComicEp10} durationInFrames={ep10Timing.total} fps={FPS} width={WIDTH} height={HEIGHT} />
+    <Composition id="ElaMeSegue" component={ComicEp11} durationInFrames={ep11Timing.total} fps={FPS} width={WIDTH} height={HEIGHT} />
     <Composition id="ComicTest" component={ComicTest} durationInFrames={120} fps={FPS} width={WIDTH} height={HEIGHT} />
   </>
 );

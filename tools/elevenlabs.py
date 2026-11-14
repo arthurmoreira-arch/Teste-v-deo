@@ -14,7 +14,7 @@ out = root / "public" / "audio" / EP / "shots"
 out.mkdir(parents=True, exist_ok=True)
 
 src = (root / "src" / "episodes" / f"{EP}.ts").read_text(encoding="utf-8")
-shots = re.findall(r"id: '([^']+)',\n\s+text: '((?:[^'\\]|\\.)*)'", src)
+shots = re.findall(r"id: '([^']+)',\n(?:\s+\w+: [^\n]*\n)*?\s+text: '((?:[^'\\]|\\.)*)'", src)
 durations = {}
 for i, (sid, text) in enumerate(shots):
     t = re.sub(r"[*!]", "", text)

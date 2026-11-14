@@ -8,7 +8,7 @@ root = pathlib.Path(__file__).resolve().parent.parent
 
 ep = sys.argv[1] if len(sys.argv) > 1 else "ep01"
 src = (root / "src" / "episodes" / f"{ep}.ts").read_text(encoding="utf-8")
-shots = re.findall(r"id: '([^']+)',\n\s+text: '((?:[^'\\]|\\.)*)'", src)
+shots = re.findall(r"id: '([^']+)',\n(?:\s+\w+: [^\n]*\n)*?\s+text: '((?:[^'\\]|\\.)*)'", src)
 out = root / "public" / "audio" / ep / "shots"
 out.mkdir(parents=True, exist_ok=True)
 if not shots:
@@ -60,19 +60,22 @@ kokoro = Kokoro(str(KDIR / "kokoro-v1.0.onnx"), str(KDIR / "voices-v1.0.bin"))
 tok = Tokenizer()
 
 VOICES = {
-    # nome:      (voz Kokoro, velocidade, pitch, filtros extras)
-    "narrador": ("pm_alex", 1.1, 1.0, ""),
-    "voce": ("pm_santa", 1.05, 1.03, ""),
-    "mae": ("pf_dora", 1.0, 1.0, ""),
-    "chefe": ("pm_santa", 1.0, 0.93, ""),
-    "jane": ("pm_santa", 1.05, 1.0, ""),
-    "redjohn": ("pm_alex", 0.86, 0.78, ",lowpass=f=5200,aecho=0.8:0.85:90|180:0.35|0.2"),
-    "vulto": ("pm_alex", 0.8, 0.72, ",lowpass=f=4200,aecho=0.8:0.88:70|160|260:0.4|0.25|0.15,tremolo=f=7:d=0.25"),
+    # nome: (voz Kokoro — pode misturar vozes "a:0.6+b:0.4" —, velocidade, pitch, filtros extras)
+    # Cada pessoa tem um timbre próprio (medido: tom médio e brilho diferentes). Só o vulto/Red John
+    # mudam o tom com rubberband; as outras vozes ficam sem processamento de tom, que deixava a fala robótica.
+    "narrador": ("pm_alex", 1.05, 1.0, ""),                          # ~135 Hz, timbre claro
+    "voce": ("pm_santa", 1.02, 1.0, ""),                             # ~135 Hz, timbre mais quente
+    "passageiro": ("pm_alex:0.6+im_nicola:0.4", 0.98, 1.0, ",highpass=f=320,lowpass=f=3400,equalizer=f=1500:t=q:w=1:g=4"),  # ~120 Hz, som de áudio de celular
+    "mae": ("pf_dora:0.6+if_sara:0.4", 1.0, 1.0, ""),                 # ~198 Hz, feminina e calorosa
+    "amiga": ("pf_dora:0.5+ef_dora:0.5", 1.04, 1.0, ""),              # ~176 Hz, feminina mais jovem
+    "chefe": ("pm_santa:0.5+em_alex:0.5", 0.97, 1.0, ""),             # ~132 Hz, mais firme
+    "jane": ("pm_santa:0.6+em_santa:0.4", 1.04, 1.0, ""),
+    "redjohn": ("pm_alex:0.65+am_onyx:0.35", 0.88, 0.85, ",lowpass=f=5200,aecho=0.8:0.85:90|180:0.35|0.2"),
+    "vulto": ("pm_alex:0.65+am_onyx:0.35", 0.84, 0.8, ",lowpass=f=4300,aecho=0.8:0.88:70|160|260:0.4|0.25|0.15,tremolo=f=6:d=0.2"),
 }
-THOUGHT_FX = ",aecho=0.8:0.6:45:0.25"  # falas de personagem soam "dentro da cabeça"
-SUSPENSE = (0.97, 0.96, ",aecho=0.8:0.7:70:0.2")  # narrador em tom de suspense (x velocidade, x pitch, fx)
-CLEAN = "highpass=f=70,equalizer=f=160:t=q:w=1:g=1.5,equalizer=f=3800:t=q:w=1.2:g=2,acompressor=threshold=-21dB:ratio=3:attack=4:release=90"
-GAP = 0.18  # silêncio entre narrador e fala
+SUSPENSE = (0.95, 1.0, ",aecho=0.8:0.6:60:0.15")  # narrador em tom de suspense: um pouco mais lento + leve eco
+CLEAN = "highpass=f=70,equalizer=f=160:t=q:w=1:g=1.5,equalizer=f=3800:t=q:w=1.2:g=2,acompressor=threshold=-21dB:ratio=2.5:attack=6:release=120"
+GAP = 0.22  # respiro entre uma pessoa e outra
 
 KSMALL = {"o": "ʊ", "a": "a", "e": "i", "de": "dʒy", "do": "dʊ", "da": "da", "nem": "nˈeɪŋ", "em": "eɪŋ", "com": "kõŋ", "se": "sy", "que": "ky"}
 _names = re.compile("|".join(f"(?P<n{k}>(?<![\\w@]){pat}(?!\\w))" for k, (pat, _) in enumerate(NAMES)))
@@ -115,19 +118,31 @@ for b in blocks:
 def dur(f):
     return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(f)]).decode())
 
+_styles = {}
+def style(spec):
+    """'pm_alex:0.6+im_nicola:0.4' -> mistura dos estilos de voz (timbre novo, sotaque pt-BR mantido)."""
+    if spec not in _styles:
+        acc = None
+        for part in spec.split("+"):
+            name, w = (part.split(":") + ["1"])[:2]
+            st = kokoro.get_voice_style(name) * float(w)
+            acc = st if acc is None else acc + st
+        _styles[spec] = acc
+    return _styles[spec]
+
 def synth(text, speaker, suspense, dst):
     voice, speed, pitch, extra = VOICES.get(speaker, VOICES["narrador"])
     fx = extra
     if speaker == "narrador" and suspense:
         speed, pitch, fx = speed * SUSPENSE[0], pitch * SUSPENSE[1], SUSPENSE[2]
-    elif speaker != "narrador":
-        fx += THOUGHT_FX
     raw = dst.with_suffix(".raw.wav")
-    audio, sr = kokoro.create(to_phonemes(text), voice=voice, speed=speed, is_phonemes=True)
+    # pausas curtas entre frases/vírgulas = fala corrida, sem "travadas"
+    audio, sr = kokoro.create(to_phonemes(text), voice=style(voice), speed=speed, is_phonemes=True, sentence_pause=0.2, clause_pause=0.06)
     sf.write(str(raw), audio, sr)
-    pf = f"rubberband=pitch={pitch}," if abs(pitch - 1) > 1e-3 else ""
-    trim = "silenceremove=start_periods=1:start_threshold=-45dB,areverse,silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(raw), "-af", f"{trim}aresample=44100,{pf}{CLEAN}{fx}", "-ac", "1", str(dst)], check=True)
+    pf = f"rubberband=pitch={pitch}:formant=preserved," if abs(pitch - 1) > 1e-3 else ""
+    # corte de silêncio suave (não come o início/fim das palavras) + fade curto + volume igual entre pessoas
+    trim = "silenceremove=start_periods=1:start_threshold=-55dB:start_silence=0.03,areverse,silenceremove=start_periods=1:start_threshold=-55dB:start_silence=0.06,areverse,"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(raw), "-af", f"{trim}aresample=44100,{pf}{CLEAN}{fx},afade=t=in:d=0.02,loudnorm=I=-16:TP=-2", "-ar", "44100", "-ac", "1", str(dst)], check=True)
     raw.unlink()
 
 durations, lines = {}, {}

@@ -4,7 +4,7 @@ import json, os, pathlib, re, subprocess
 root = pathlib.Path(__file__).resolve().parent.parent
 EP = os.environ.get("EP", "ep01")  # ex.: EP=ep02
 src = (root / "src" / "episodes" / f"{EP}.ts").read_text(encoding="utf-8")
-ids = [m for m, _ in re.findall(r"id: '([^']+)',\n\s+text: '((?:[^'\\]|\\.)*)'", src)]
+ids = [m for m, _ in re.findall(r"id: '([^']+)',\n(?:\s+\w+: [^\n]*\n)*?\s+text: '((?:[^'\\]|\\.)*)'", src)]
 d = {}
 for i, sid in enumerate(ids):
     f = root / "public" / "audio" / EP / "shots" / f"{i:02d}.mp3"

@@ -16,12 +16,12 @@ export const shots: ComicShot[] = [
   },
   {
     id: 'entrou',
-    text: 'O passageiro mandou: *já entrei.* Mas eu nem parei o carro.',
+    text: 'O passageiro mandou: {passageiro:Já entrei.} Mas eu nem parei o carro.',
     tone: 'suspense',
   },
   {
     id: 'regra',
-    text: 'E depois: !não olha pelo retrovisor.! Só dirige.',
+    text: 'E depois: {passageiro:Não olha pelo retrovisor. Só dirige.}',
     sfx: 'hit',
   },
   {
@@ -51,12 +51,12 @@ export const shots: ComicShot[] = [
   },
   {
     id: 'msg',
-    text: 'Outra mensagem: *ele não sou eu.* Não para o carro.',
+    text: 'Outra mensagem: {passageiro:Ele não sou eu. Não para o carro.}',
     tone: 'suspense',
   },
   {
     id: 'mae',
-    text: 'E a minha mãe: *filho, cadê você?*',
+    text: 'E a minha mãe: {mae:Filho, cadê você? Vem pra casa.}',
   },
   {
     id: 'para',

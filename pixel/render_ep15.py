@@ -215,7 +215,7 @@ def sc_abolicao(img, d, f, n, sp, gi):
     put_avatar(img, "imperio", talk(gi), 70, 470, 5)
 
 def sc_pergunta(img, d, f, n, sp, gi):
-    d.rectangle([0, 0, W, H], fill=hx("#06040e"))
+    dark(d, "#06040e")
     if f >= sp - 10:
         k = min(1.0, (f - sp + 10) / 4)
         text(d, (135, 160), "E DEPOIS?", int(16 + 18 * k), WHITE, 3)
@@ -332,7 +332,10 @@ def frame(gi):
     img = Image.new("RGB", (W, H)); d = ImageDraw.Draw(img); d.fontmode = "1"
     SC[sid](img, d, f, n, sp, gi)
     d = ImageDraw.Draw(img); d.fontmode = "1"
-    if sid not in ("quiz", "pergunta"):
+    if sid == "pergunta":
+        if f < sp - 10:
+            captions(d, txt, f, sp - 10, y=160)
+    elif sid != "quiz":
         captions(d, txt, f, sp)
     box(d, 8, H - 22, 82, H - 8, RED, INK, 2); text(d, (45, H - 15), "PARTE 2", 9, WHITE, 0)
     d.rectangle([0, 0, int(W * gi / TOTAL), 3], fill=YEL)

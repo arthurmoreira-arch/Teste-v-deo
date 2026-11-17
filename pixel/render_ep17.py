@@ -126,7 +126,7 @@ def sc_falha(img, d, f, n):
     bench(d, f, 4, rep, shake=(2 if f % 2 else -2), strain=near)
     text(d, (135, 120), f"{reps} REPS", 18, YEL, 2)
     if near:
-        box(d, 160, 200, 250, 222, RED); text(d, (205, 211), "QUASE FALHA", 9, WHITE, 0)
+        box(d, 96, 190, 186, 212, RED); text(d, (141, 201), "QUASE FALHA", 9, WHITE, 0)
 
 def sc_frequencia(img, d, f, n):
     gym(d, f)

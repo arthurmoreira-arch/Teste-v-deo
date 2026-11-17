@@ -4,3 +4,4 @@ out
 node_modules
 *.mp4
 public/audio/*/shots/*.wav
+avatar/out/frames/

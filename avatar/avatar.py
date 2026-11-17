@@ -339,10 +339,20 @@ def o_imperio(cv):  # casaca do Império (séc. XIX): azul, gola alta, dragonas 
     cv.rect(37, 49, 40, 63, hx("#c8202a"))  # faixa
 
 
+def o_colono(cv):  # séc. XVIII: casaca marrom, colete, gravata de renda
+    torso(cv, hx("#6a4428"), hx("#4a2e18"), hx("#8a5a34"))
+    cv.rect(26, 48, 37, 63, hx("#c8a060"))
+    cv.rows({45: (27, 36), 46: (26, 37), 47: (27, 36), 48: (28, 35), 49: (29, 34), 50: (30, 33)}, hx("#f4f0e4"))
+    cv.rows({46: (29, 34), 47: (30, 33)}, P["skinSh"])
+    for y in (53, 56, 59, 62):
+        cv.set(31, y, hx("#e8c070")); cv.set(32, y, hx("#e8c070"))
+
+
 OUTFITS = {
     "casual": (o_casual, None, "#1b1b2b"),
     "brasil": (o_brasil, None, "#0e3a24"),
     "imperio": (o_imperio, None, "#2a1a10"),
+    "colono": (o_colono, hat_tricornio, "#2a1a0a"),
     "historia": (o_historia, hat_romano, "#5a2a1a"),
     "cinema": (o_cinema, hat_boina, "#2a1a3a"),
     "terror": (o_terror, hat_capuz, "#0c0610"),
@@ -353,7 +363,7 @@ OUTFITS = {
     "mentalista": (o_mentalista, None, "#2a1a1a"),
     "pirata": (o_pirata, hat_tricornio, "#0a2a3a"),
 }
-COVER = {"historia", "cinema", "terror", "detetive", "pirata"}
+COVER = {"historia", "cinema", "terror", "detetive", "pirata", "colono"}
 
 
 def build(outfit="casual", expr="neutral"):

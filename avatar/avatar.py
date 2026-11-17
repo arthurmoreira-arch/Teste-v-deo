@@ -348,8 +348,22 @@ def o_colono(cv):  # séc. XVIII: casaca marrom, colete, gravata de renda
         cv.set(31, y, hx("#e8c070")); cv.set(32, y, hx("#e8c070"))
 
 
+def o_academia(cv):  # regata preta de academia + corrente; braços/ombros de fora
+    torso(cv, P["skin"], P["skinSh"], P["skinHi"])
+    for y in range(47, 64):  # peito/regata
+        a = 18 + max(0, 51 - y); b = 45 - max(0, 51 - y)
+        cv.hline(a, b, y, hx("#141418"))
+    cv.rows({46: (24, 39), 47: (22, 41)}, P["skinSh"])
+    cv.rows({48: (26, 37), 49: (28, 35), 50: (29, 34)}, P["skinSh"])
+    for y in range(47, 64):
+        cv.set(18 + max(0, 51 - y), y, hx("#2a2a32")); cv.set(45 - max(0, 51 - y), y, hx("#2a2a32"))
+    cv.rect(10, 52, 14, 54, P["skinHi"]); cv.rect(49, 52, 53, 54, P["skinSh"])
+    chain(cv)
+
+
 OUTFITS = {
     "casual": (o_casual, None, "#1b1b2b"),
+    "academia": (o_academia, None, "#1a1a1e"),
     "brasil": (o_brasil, None, "#0e3a24"),
     "imperio": (o_imperio, None, "#2a1a10"),
     "colono": (o_colono, hat_tricornio, "#2a1a0a"),

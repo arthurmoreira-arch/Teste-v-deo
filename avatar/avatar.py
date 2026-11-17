@@ -325,9 +325,24 @@ def o_brasil(cv):  # camisa da seleção
     chain(cv)
 
 
+def o_imperio(cv):  # casaca do Império (séc. XIX): azul, gola alta, dragonas e botões dourados
+    torso(cv, hx("#1e3a7a"), hx("#122650"), hx("#2e5aa8"))
+    cv.rows({45: (26, 37), 46: (25, 38), 47: (26, 37)}, hx("#f0ece4"))  # gola branca
+    cv.rows({46: (29, 34), 47: (30, 33)}, P["skinSh"])
+    cv.rect(30, 48, 33, 63, hx("#f0ece4"))
+    for y in (51, 54, 57, 60):
+        cv.set(28, y, hx("#ffd34a")); cv.set(35, y, hx("#ffd34a"))
+    for x0 in (8, 46):  # dragonas
+        cv.rect(x0, 49, x0 + 9, 51, hx("#ffd34a"))
+        for x in range(x0, x0 + 10, 2):
+            cv.rect(x, 52, x, 54, hx("#e8b020"))
+    cv.rect(37, 49, 40, 63, hx("#c8202a"))  # faixa
+
+
 OUTFITS = {
     "casual": (o_casual, None, "#1b1b2b"),
     "brasil": (o_brasil, None, "#0e3a24"),
+    "imperio": (o_imperio, None, "#2a1a10"),
     "historia": (o_historia, hat_romano, "#5a2a1a"),
     "cinema": (o_cinema, hat_boina, "#2a1a3a"),
     "terror": (o_terror, hat_capuz, "#0c0610"),

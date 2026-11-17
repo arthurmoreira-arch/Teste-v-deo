@@ -314,8 +314,20 @@ def hat_tricornio(cv):
     cv.rect(30, 5, 33, 8, hx("#f0f0f0")); cv.set(31, 6, T); cv.set(32, 6, T)
 
 
+def o_brasil(cv):  # camisa da seleção
+    torso(cv, hx("#f6d32a"), hx("#d8a818"), hx("#fff07a"))
+    cv.rows({45: (26, 37), 46: (25, 38), 47: (26, 37)}, hx("#1f9a4a"))
+    cv.rows({46: (28, 35), 47: (29, 34)}, P["skinSh"])
+    for y in range(48, 64):
+        cv.set(9 + max(0, 52 - y) // 6, y, hx("#1f9a4a")); cv.set(54 - max(0, 52 - y) // 6, y, hx("#1f9a4a"))
+    cv.rect(16, 52, 20, 57, hx("#2a5ac8")); cv.set(18, 54, hx("#ffffff"))
+    cv.rect(39, 51, 43, 57, hx("#1f9a4a")); cv.rect(40, 52, 42, 56, hx("#f6d32a")); cv.set(41, 54, hx("#2a5ac8"))
+    chain(cv)
+
+
 OUTFITS = {
     "casual": (o_casual, None, "#1b1b2b"),
+    "brasil": (o_brasil, None, "#0e3a24"),
     "historia": (o_historia, hat_romano, "#5a2a1a"),
     "cinema": (o_cinema, hat_boina, "#2a1a3a"),
     "terror": (o_terror, hat_capuz, "#0c0610"),

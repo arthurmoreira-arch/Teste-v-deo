@@ -64,7 +64,9 @@ VOICES = {
     # Cada pessoa tem um timbre próprio (medido: tom médio e brilho diferentes). Só o vulto/Red John
     # mudam o tom com rubberband; as outras vozes ficam sem processamento de tom, que deixava a fala robótica.
     "narrador": ("pm_alex", 1.05, 1.0, ""),                          # ~135 Hz, timbre claro
-    "voce": ("pm_santa", 1.02, 1.0, ""),                             # ~135 Hz, timbre mais quente
+    "voce": ("pm_santa", 1.02, 1.0, ""),
+    # apresentador jovem: timbre quente (santa) + um pouco de alex, mais rápido e levemente mais agudo, com presença
+    "jovem": ("pm_santa:0.75+pm_alex:0.25", 1.12, 1.04, ",equalizer=f=220:t=q:w=1:g=1.5,equalizer=f=5200:t=q:w=1:g=2.5,aecho=0.6:0.3:18:0.08"),                             # ~135 Hz, timbre mais quente
     "passageiro": ("pm_alex:0.6+im_nicola:0.4", 0.98, 1.0, ",highpass=f=320,lowpass=f=3400,equalizer=f=1500:t=q:w=1:g=4"),  # ~120 Hz, som de áudio de celular
     "mae": ("pf_dora:0.6+if_sara:0.4", 1.0, 1.0, ""),                 # ~198 Hz, feminina e calorosa
     "amiga": ("pf_dora:0.5+ef_dora:0.5", 1.04, 1.0, ""),              # ~176 Hz, feminina mais jovem
@@ -136,8 +138,23 @@ def synth(text, speaker, suspense, dst):
     if speaker == "narrador" and suspense:
         speed, pitch, fx = speed * SUSPENSE[0], pitch * SUSPENSE[1], SUSPENSE[2]
     raw = dst.with_suffix(".raw.wav")
-    # pausas curtas entre frases/vírgulas = fala corrida, sem "travadas"
-    audio, sr = kokoro.create(to_phonemes(text), voice=style(voice), speed=speed, is_phonemes=True, sentence_pause=0.2, clause_pause=0.06)
+    # fala mais humana: cada frase é gerada separada, com ritmo levemente diferente (pergunta mais lenta,
+    # exclamação mais rápida, frase curta mais enérgica) e respiros curtos entre elas — a voz da IA perde o "tom de leitura".
+    import numpy as _np
+    parts = [p.strip() for p in re.split(r"(?<=[.!?…])\s+", text) if p.strip()]
+    chunks, sr = [], 24000
+    for k, sent in enumerate(parts):
+        clean = re.sub(r"[*!]", "", sent).strip()
+        var = 1.0 + (((k * 37) % 7) - 3) * 0.012
+        if clean.endswith("?"):
+            var *= 0.96
+        elif len(clean.split()) <= 4:
+            var *= 1.05
+        a, sr = kokoro.create(to_phonemes(sent), voice=style(voice), speed=speed * var, is_phonemes=True, sentence_pause=0.15, clause_pause=0.05)
+        chunks.append(a)
+        if k < len(parts) - 1:
+            chunks.append(_np.zeros(int(sr * (0.16 if clean.endswith(("?", "...", "…")) else 0.1)), _np.float32))
+    audio = _np.concatenate(chunks)
     sf.write(str(raw), audio, sr)
     pf = f"rubberband=pitch={pitch}:formant=preserved," if abs(pitch - 1) > 1e-3 else ""
     # corte de silêncio suave (não come o início/fim das palavras) + fade curto + volume igual entre pessoas
